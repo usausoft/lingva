@@ -11,6 +11,10 @@ on:
         options:
           - all
           - windows
+      prepared_run_id:
+        description: Complete five-target proof to publish without rebuilding (requires release_tag)
+        type: string
+        default: ''
       release_tag:
         description: Existing immutable CLI tag to complete after verified Windows recovery
         type: string
@@ -38,13 +42,13 @@ jobs:
   test:
     # Windows-only diagnosis is paired with PR CI's Linux quality proof. Tag
     # releases still require this gate and the complete native matrix.
-    if: github.event_name != 'workflow_dispatch' || inputs.target != 'windows'
+    if: inputs.prepared_run_id == '' && (github.event_name != 'workflow_dispatch' || inputs.target != 'windows')
     uses: ./.github/workflows/cli-quality.yml
 
   build:
     name: Build ${{ matrix.target }}
     needs: test
-    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.target == 'windows' && inputs.windows_proof_run_id != '') && (needs.test.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.target == 'windows' && needs.test.result == 'skipped')) && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/cli/v')) }}
+    if: ${{ !cancelled() && inputs.prepared_run_id == '' && !(github.event_name == 'workflow_dispatch' && inputs.target == 'windows' && inputs.windows_proof_run_id != '') && (needs.test.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.target == 'windows' && needs.test.result == 'skipped')) && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/cli/v')) }}
     strategy:
       fail-fast: false
       matrix:
@@ -115,7 +119,7 @@ jobs:
 
   release:
     name: Publish complete npm binary channel and GitHub release
-    if: ${{ !cancelled() && ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/cli/v') && needs.build.result == 'success') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.target == 'windows' && inputs.release_tag != '' && inputs.original_run_id != '' && inputs.windows_proof_run_id != '' && needs.build.result == 'skipped')) }}
+    if: ${{ !cancelled() && ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/cli/v') && needs.build.result == 'success') || (github.event_name == 'workflow_dispatch' && inputs.prepared_run_id != '' && inputs.release_tag != '' && needs.build.result == 'skipped') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.target == 'windows' && inputs.release_tag != '' && inputs.original_run_id != '' && inputs.windows_proof_run_id != '' && needs.build.result == 'skipped')) }}
     needs: build
     runs-on: ubuntu-latest
     environment: Production
@@ -125,6 +129,7 @@ jobs:
       actions: read
     env:
       CLI_RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+      CLI_PREPARED_RUN_ID: ${{ inputs.prepared_run_id }}
       CLI_ORIGINAL_RUN_ID: ${{ inputs.original_run_id }}
       CLI_WINDOWS_PROOF_RUN_ID: ${{ inputs.windows_proof_run_id }}
     steps:
@@ -132,7 +137,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Verify recovery source identity and all native proof records
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && inputs.prepared_run_id == ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -147,6 +152,22 @@ jobs:
           package-manager-cache: false
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
+      - name: Verify prepared native proof and immutable tag
+        if: inputs.prepared_run_id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/verify-cli-engine-version.mjs
+          node scripts/verify-cli-prepared-release.mjs
+      - name: Reuse all five prepared native archives
+        if: inputs.prepared_run_id != ''
+        uses: actions/download-artifact@v8
+        with:
+          run-id: ${{ inputs.prepared_run_id }}
+          github-token: ${{ github.token }}
+          pattern: lingva-*
+          merge-multiple: true
+          path: release
       - uses: actions/download-artifact@v8
         if: github.event_name == 'push'
         with:
@@ -154,7 +175,7 @@ jobs:
           merge-multiple: true
           path: release
       - name: Reuse four verified original archives
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && inputs.prepared_run_id == ''
         uses: actions/download-artifact@v8
         with:
           run-id: ${{ inputs.original_run_id }}
@@ -163,7 +184,7 @@ jobs:
           merge-multiple: true
           path: release
       - name: Reuse corrected Windows proof archive
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && inputs.prepared_run_id == ''
         uses: actions/download-artifact@v8
         with:
           run-id: ${{ inputs.windows_proof_run_id }}
