@@ -85,7 +85,6 @@ jobs:
 
       - name: Pull Vercel project settings
         run: pnpm dlx vercel pull --yes --environment="${VERCEL_TARGET}" --token "${VERCEL_TOKEN}"
-        working-directory: apps/docs
 
       - name: Build public docs for Vercel
         shell: bash
@@ -95,7 +94,6 @@ jobs:
             args+=(--prod)
           fi
           pnpm dlx vercel "${args[@]}"
-        working-directory: apps/docs
 
       - name: Deploy public docs to Vercel
         id: deploy
@@ -107,7 +105,6 @@ jobs:
           fi
           deployment_url="$(pnpm dlx vercel "${args[@]}")"
           echo "url=${deployment_url}" >> "${GITHUB_OUTPUT}"
-        working-directory: apps/docs
 
       - name: Point canonical domain to deployment
         if: ${{ env.VERCEL_CANONICAL_URL != '' }}
@@ -119,4 +116,3 @@ jobs:
           canonical_domain="${canonical_domain#http://}"
           canonical_domain="${canonical_domain%/}"
           pnpm dlx vercel alias set "${DEPLOYMENT_URL}" "${canonical_domain}" --token "${VERCEL_TOKEN}"
-        working-directory: apps/docs

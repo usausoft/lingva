@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm exec turbo run build --filter=@lingva/docs",
+  "outputDirectory": "apps/docs/build",
+  "git": {
+    "deploymentEnabled": false
+  }
+}
