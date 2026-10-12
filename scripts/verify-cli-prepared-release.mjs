@@ -77,6 +77,10 @@ function verifyPreparedRelease() {
     parse(execFileSync('git', ['show', `${run.head_sha}:${WORKFLOW_PATH}`], { encoding: 'utf8' })),
     parse(fs.readFileSync(WORKFLOW_PATH, 'utf8'))
   );
+  // Tag the reviewed publication revision. GitHub's workflow token cannot tag
+  // an older revision that changes workflows relative to the default branch.
+  // The diff above proves every compiled and installation input is unchanged.
+  const releaseSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   const artifacts = api(`repos/${repository}/actions/runs/${runId}/artifacts?per_page=100`).artifacts;
   for (const target of TARGETS) {
     const matches = artifacts.filter((artifact) => artifact.name === `lingva-${target}`);
@@ -84,16 +88,9 @@ function verifyPreparedRelease() {
     assert.equal(matches[0].expired, false);
   }
   const refs = api(`repos/${repository}/git/matching-refs/tags/${tag}`).filter((ref) => ref.ref === `refs/tags/${tag}`);
-  if (refs.length) assert.equal(refs[0].object.sha, run.head_sha, 'Never move an immutable release tag.');
+  if (refs.length) assert.equal(refs[0].object.sha, releaseSha, 'Never move an immutable release tag.');
   else
-    api(`repos/${repository}/git/refs`, [
-      '--method',
-      'POST',
-      '-f',
-      `ref=refs/tags/${tag}`,
-      '-f',
-      `sha=${run.head_sha}`,
-    ]);
+    api(`repos/${repository}/git/refs`, ['--method', 'POST', '-f', `ref=refs/tags/${tag}`, '-f', `sha=${releaseSha}`]);
   console.log(`Verified ${tag}: all five native artifacts belong to ${run.head_sha}.`);
 }
 
