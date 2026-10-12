@@ -8,6 +8,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { PUBLIC_PACKAGE_DIRECTORIES, PUBLIC_PACKAGE_NAMES } from './public-packages.mjs';
+import { verifyPublicBuild } from './verify-public-boundary.mjs';
 
 const PACKAGE_MANAGER_COMMAND = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
 const REPOSITORY_URL = 'git+https://github.com/usausoft/lingva.git';
@@ -80,6 +81,7 @@ async function assertInstalledPackage(consumerDirectory, packageName, expectedLi
   assert.equal(manifest.publishConfig?.access, 'public');
   assert.equal(await fs.readFile(path.join(packageDirectory, 'LICENSE.md'), 'utf8'), expectedLicense);
   await fs.access(path.join(packageDirectory, 'README.md'));
+  await verifyPublicBuild(path.join(packageDirectory, 'dist'));
 }
 
 async function main() {

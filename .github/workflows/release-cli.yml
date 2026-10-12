@@ -190,6 +190,7 @@ jobs:
           node scripts/verify-cli-release-assets.mjs
           pnpm --filter @lingva/core run build
           pnpm --filter @lingva/cli run build
+          node scripts/verify-public-boundary.mjs packages/cli/dist
           pnpm --filter @lingva/cli pack --pack-destination release
       - name: Publish the checksummed public binary channel
         # Public source supports provenance with the approved OIDC trusted publisher.
