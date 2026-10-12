@@ -6,7 +6,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { PUBLIC_PACKAGE_DIRECTORIES, PUBLIC_PACKAGE_NAMES } from './public-packages.mjs';
 
 const PACKAGE_MANAGER_COMMAND = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';

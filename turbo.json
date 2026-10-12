@@ -26,49 +26,24 @@
   ],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env*"
-      ],
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "!.next/cache/**",
-        "build/**",
-        "aws/dist/**"
-      ]
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**", "build/**", "aws/dist/**"]
     },
     "test": {
-      "dependsOn": [
-        "build"
-      ],
-      "inputs": [
-        "src/**/*.tsx",
-        "src/**/*.ts",
-        "test/**/*.ts"
-      ]
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts"]
     },
     "lint": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "typecheck": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "quality": {
-      "dependsOn": [
-        "typecheck",
-        "lint",
-        "test"
-      ],
+      "dependsOn": ["typecheck", "lint", "test"],
       "outputs": []
     },
     "dev": {

@@ -118,8 +118,7 @@ export function routeChanges(changed, packages) {
   }
   const affected = dependencyClosure([...packageNames], packages, 'dependents');
   required.cli ||= affected.includes('@lingva/cli');
-  required.docs ||=
-    affected.some((name) => ['@lingva/docs'].includes(name)) || required.cli || required.python;
+  required.docs ||= affected.some((name) => ['@lingva/docs'].includes(name)) || required.cli || required.python;
   const workspace = affected.filter((name) => !['@lingva/cli', '@lingva/docs'].includes(name));
   required.workspace =
     workspace.length > 0 || changed.some((file) => file.startsWith('scripts/') || ROOT_INPUTS.has(file));
@@ -218,8 +217,7 @@ export function groupInputs(group, tree, packages, workspace) {
       const knownSdk = ['python-cli', 'fixtures', ...SDK_GROUPS].some((sdk) => file.startsWith(`sdks/${sdk}/`));
       if (!owner && !knownSdk) return true;
       if (directories.some((directory) => file.startsWith(directory))) return true;
-      if (group === 'cli' && /^(?:crates\/|Cargo\.|sdks\/python-cli\/|packaging\/)/u.test(file))
-        return true;
+      if (group === 'cli' && /^(?:crates\/|Cargo\.|sdks\/python-cli\/|packaging\/)/u.test(file)) return true;
       return (
         file.startsWith(`sdks/${group}/`) || file.startsWith('sdks/fixtures/') || file.startsWith('packages/core/src/')
       );

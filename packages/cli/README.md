@@ -137,4 +137,3 @@ install `lingva-cli` last. No project, translation, credential, or remote-state
 data migration is required.
 
 [Read the installation guide](https://docs.lingva.dev/installation/overview).
-

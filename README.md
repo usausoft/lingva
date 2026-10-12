@@ -13,4 +13,3 @@ Native Swift, Kotlin, and Flutter SDKs are source previews. Python packages are 
 ## Releases
 
 Keep package names and immutable published versions. SDKs use Changesets and `v*` tags. CLI releases use `cli/v*`; Python packages use `python-sdk/v*` and `python-cli/v*` tags. The next CLI/adapters version is 0.1.5.
-

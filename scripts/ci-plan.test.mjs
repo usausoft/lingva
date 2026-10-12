@@ -17,17 +17,27 @@ test('core changes verify dependent consumers and all native runtimes', () => {
 test('native source changes select only the matching runtime', () => {
   for (const sdk of ['swift', 'kotlin', 'flutter']) {
     const selected = routeChanges([`sdks/${sdk}/src/runtime`], packages).required;
-    assert.deepEqual(Object.keys(selected).filter((key) => selected[key]), [sdk]);
+    assert.deepEqual(
+      Object.keys(selected).filter((key) => selected[key]),
+      [sdk]
+    );
   }
 });
 test('documentation does not start native runtime checks', () => {
   const selected = routeChanges(['apps/docs/docs/intro.md'], packages).required;
-  assert.deepEqual(Object.keys(selected).filter((key) => selected[key]), ['docs']);
+  assert.deepEqual(
+    Object.keys(selected).filter((key) => selected[key]),
+    ['docs']
+  );
 });
 test('unknown code gets conservative verification', () => {
   const selected = routeChanges(['new-runtime/index.ts'], packages).required;
   assert.ok(Object.values(selected).every(Boolean));
 });
 test('dependencies include the full local build graph', () => {
-  assert.deepEqual(dependencyClosure(['@lingva/docs'], packages, 'dependencies'), ['@lingva/core', '@lingva/docs', '@lingva/js']);
+  assert.deepEqual(dependencyClosure(['@lingva/docs'], packages, 'dependencies'), [
+    '@lingva/core',
+    '@lingva/docs',
+    '@lingva/js',
+  ]);
 });
