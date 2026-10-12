@@ -52,6 +52,22 @@
     },
     "clean": {
       "cache": false
+    },
+    "@lingva/example-nuxt-starter#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".nuxt/**", ".output/**"]
+    },
+    "@lingva/example-nuxt-starter#typecheck": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "@lingva/example-sveltekit-starter#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".svelte-kit/**"]
+    },
+    "@lingva/example-sveltekit-starter#typecheck": {
+      "dependsOn": ["build"],
+      "outputs": []
     }
   }
 }
