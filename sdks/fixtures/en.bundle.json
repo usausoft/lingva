@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "projectId": "native-demo",
+  "environment": "dev",
+  "locale": "en",
+  "defaultLocale": "en",
+  "fallbackLocale": "en",
+  "generatedAt": "2026-09-25T00:00:00.000Z",
+  "keyCount": 2,
+  "fallbackKeys": [],
+  "messages": {
+    "actions.continue": "Continue",
+    "welcome.title": "Welcome, {name}."
+  },
+  "variants": {
+    "welcome.title": [
+      {
+        "id": "warm",
+        "text": "Welcome, {name}.",
+        "tone": "warm"
+      },
+      {
+        "id": "bold",
+        "text": "Ship it, {name}!",
+        "tone": "direct"
+      }
+    ]
+  },
+  "sources": {
+    "actions.continue": "en",
+    "welcome.title": "en"
+  },
+  "variables": {
+    "actions.continue": [],
+    "welcome.title": ["name"]
+  },
+  "entries": [
+    {
+      "key": "actions.continue",
+      "value": "Continue",
+      "sourceLocale": "en",
+      "fallback": false,
+      "variables": [],
+      "namespace": "actions"
+    },
+    {
+      "key": "welcome.title",
+      "value": "Welcome, {name}.",
+      "sourceLocale": "en",
+      "fallback": false,
+      "variables": ["name"],
+      "namespace": "welcome",
+      "variants": [
+        {
+          "id": "warm",
+          "text": "Welcome, {name}.",
+          "tone": "warm"
+        },
+        {
+          "id": "bold",
+          "text": "Ship it, {name}!",
+          "tone": "direct"
+        }
+      ]
+    }
+  ]
+}

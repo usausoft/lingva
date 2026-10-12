@@ -1,0 +1,65 @@
+name: Public SDK Alpha Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      label:
+        description: Prerelease label (defaults to the short Git SHA)
+        required: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  NODE_VERSION: 24
+  NPM_CONFIG_PROVENANCE: true
+  PNPM_VERSION: 12.8.1
+
+jobs:
+  release-alpha:
+    name: Publish public SDK alpha
+    if: ${{ github.ref_name == 'dev' }}
+    runs-on: ubuntu-latest
+    # Alpha artifacts follow the dev branch and therefore use the Development
+    # environment identity. Stable publication remains tag-only in Production.
+    environment: Development
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js and public npm registry
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Stamp alpha versions
+        run: |
+          LABEL="${{ inputs.label || github.sha }}"
+          node scripts/stamp-alpha-version.mjs "${LABEL:0:7}"
+
+      - name: Audit production dependencies
+        run: pnpm audit:prod
+
+      - name: Build packages
+        run: pnpm build:packages
+
+      - name: Verify packed public packages
+        run: pnpm verify:packages
+
+      - name: Publish alpha packages
+        run: pnpm -r publish --no-git-checks --tag alpha

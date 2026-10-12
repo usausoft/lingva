@@ -1,0 +1,10 @@
+{
+  "app": {
+    "badge": "Nuxt SSR starter",
+    "locale": "Locale",
+    "localeEnglish": "English",
+    "localeRussian": "Russian",
+    "subtitle": "Each server request owns its Lingva runtime, while the browser receives an isolated Vue plugin.",
+    "title": "Render multilingual Nuxt apps safely"
+  }
+}

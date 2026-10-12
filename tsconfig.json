@@ -1,0 +1,6 @@
+{
+  "extends": "@lingva/typescript-config/base.json",
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

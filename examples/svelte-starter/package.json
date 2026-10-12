@@ -1,0 +1,28 @@
+{
+  "name": "@lingva/example-svelte-starter",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3500",
+    "build": "svelte-check --tsconfig ./tsconfig.json && vite build",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
+    "lingva:check": "lingva check",
+    "verify:starter": "node scripts/verify-starter.mjs"
+  },
+  "dependencies": {
+    "@lingva/core": "workspace:*",
+    "@lingva/svelte": "workspace:*",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "svelte": "^5.57.0",
+    "vite": "8.1.5"
+  },
+  "devDependencies": {
+    "@lingva/cli": "workspace:*",
+    "@lingva/eslint-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "svelte-check": "^4.3.4",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "site": {
+    "footer": {
+      "copyright": "Copyright © Lingva.",
+      "docs": "Документы",
+      "gettingStarted": "Быстрый старт"
+    },
+    "nav": {
+      "dashboard": "Панель",
+      "docs": "Документы"
+    },
+    "searchPlaceholder": "Искать по документации...",
+    "tagline": "Языковая инфраструктура для разработчиков",
+    "title": "Документация Lingva"
+  }
+}

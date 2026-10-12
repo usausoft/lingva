@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lingva.dev/schemas/lingva-remote-state.schema.json",
+  "title": "Lingva remote synchronization state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "projectId", "environment", "locales"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "projectId": { "type": "string", "minLength": 1 },
+    "environment": { "type": "string", "minLength": 1 },
+    "locales": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["revision", "base"],
+        "properties": {
+          "revision": { "type": "string", "minLength": 1 },
+          "base": { "type": "object" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "name": "@lingva/js",
+  "version": "0.1.0",
+  "description": "Framework-agnostic JavaScript runtime for Lingva localization",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
+  },
+  "homepage": "https://lingva.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usausoft/lingva.git",
+    "directory": "packages/js"
+  },
+  "bugs": {
+    "url": "https://github.com/usausoft/lingva/issues"
+  },
+  "keywords": [
+    "i18n",
+    "localization",
+    "translations",
+    "javascript"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ../../scripts/build-package.mjs",
+    "dev": "LINGVA_DEV_BUILD=true tsdown --watch",
+    "test": "node --import tsx --test src/*.test.ts",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@lingva/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@lingva/eslint-config": "workspace:*",
+    "@lingva/typescript-config": "workspace:*",
+    "@types/node": "^25.1.0",
+    "eslint": "^9.39.2",
+    "tsdown": "^0.21.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

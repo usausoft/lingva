@@ -1,0 +1,38 @@
+[package]
+name = "lingva"
+version = "0.1.5"
+description = "Standalone Lingva localization CLI"
+homepage = "https://lingva.dev"
+readme = "README.md"
+keywords = ["i18n", "localization", "translations", "cli"]
+categories = ["command-line-utilities", "internationalization"]
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "lingva"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+base64.workspace = true
+chrono.workspace = true
+clap.workspace = true
+dirs.workspace = true
+open.workspace = true
+rand.workspace = true
+reqwest.workspace = true
+semver.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+sha2.workspace = true
+tiny_http.workspace = true
+url.workspace = true
+tree-sitter = "0.25.10"
+tree-sitter-typescript = "0.23.2"
+tree-sitter-javascript = "0.25.0"
+tempfile = "3.23"
+fs2 = "0.4.3"

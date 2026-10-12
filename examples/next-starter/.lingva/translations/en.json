@@ -1,0 +1,23 @@
+{
+  "app": {
+    "badge": "Next.js starter",
+    "cta": "Open the docs",
+    "locale": "Locale",
+    "subtitle": "Use one provider, one config file, and generated local translations without importing every locale by hand.",
+    "title": "Ship localized Next.js apps with Lingva"
+  },
+  "cards": {
+    "config": {
+      "body": "Keep locales declarative in lingva.config.ts while Lingva manages generated project artifacts.",
+      "title": "Config-first"
+    },
+    "delivery": {
+      "body": "Start with repository-backed JSON, then connect hosted pull, push, and invalidation when the team is ready.",
+      "title": "Local to hosted"
+    },
+    "typing": {
+      "body": "Use generated resources for typed keys, variables, and locale-safe component usage.",
+      "title": "Typed runtime"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lingva-cli"
+version = "0.1.5"
+description = "Checksum-verifying Python launcher for the standalone Lingva Rust CLI"
+readme = "README.md"
+license = { text = "SEE LICENSE IN LICENSE.md" }
+requires-python = ">=3.9"
+dependencies = []
+
+[project.scripts]
+lingva = "lingva_cli._launcher:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lingva_cli"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

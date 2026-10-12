@@ -1,0 +1,82 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalEnv": [
+    "DASHBOARD_URL",
+    "DOCS_BASE_URL",
+    "DOCS_RUNTIME_LOCALE",
+    "DOCS_SITE_URL",
+    "GITHUB_REPOSITORY",
+    "CI",
+    "LINGVA_BUNDLE_URL",
+    "LINGVA_CLI_BINARY",
+    "LINGVA_CLI_NATIVE_REQUIRED",
+    "LINGVA_CLI_ASSET_BASE_URL",
+    "LINGVA_CLI_VERSION",
+    "LINGVA_CLI_INSTALL_CHANNEL",
+    "LINGVA_TEST_PYTHON",
+    "LINGVA_DELIVERY_MODE",
+    "LINGVA_API_KEY",
+    "LINGVA_DELIVERY_AUTH_TOKEN",
+    "LINGVA_DEV_BUILD",
+    "LINGVA_PLATFORM_URL",
+    "NODE_ENV",
+    "ALGOLIA_APP_ID",
+    "ALGOLIA_API_KEY"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*"
+      ],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "!.next/cache/**",
+        "build/**",
+        "aws/dist/**"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "build"
+      ],
+      "inputs": [
+        "src/**/*.tsx",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": []
+    },
+    "quality": {
+      "dependsOn": [
+        "typecheck",
+        "lint",
+        "test"
+      ],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

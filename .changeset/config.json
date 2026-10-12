@@ -1,0 +1,26 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    [
+      "@lingva/core",
+      "@lingva/js",
+      "@lingva/react",
+      "@lingva/next",
+      "@lingva/angular",
+      "@lingva/vue",
+      "@lingva/svelte",
+      "@lingva/docusaurus",
+      "@lingva/electron",
+      "@lingva/node"
+    ]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@lingva/cli"
+  ]
+}

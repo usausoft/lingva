@@ -1,0 +1,10 @@
+{
+  "app": {
+    "badge": "SvelteKit SSR стартер",
+    "locale": "Язык",
+    "localeEnglish": "Английский",
+    "localeRussian": "Русский",
+    "subtitle": "Каждая серверная загрузка создаёт и освобождает собственный Lingva runtime до возврата сериализуемых данных.",
+    "title": "Безопасный мультиязычный SSR со SvelteKit"
+  }
+}

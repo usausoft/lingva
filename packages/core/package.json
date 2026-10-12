@@ -1,0 +1,61 @@
+{
+  "name": "@lingva/core",
+  "version": "0.1.0",
+  "description": "Core client for Lingva localization platform",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
+  },
+  "homepage": "https://lingva.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usausoft/lingva.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/usausoft/lingva/issues"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ../../scripts/build-package.mjs",
+    "dev": "LINGVA_DEV_BUILD=true tsdown --watch",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "i18n",
+    "localization",
+    "translations",
+    "typescript"
+  ],
+  "author": "Yury Saukou <yury.saukou@gmail.com>",
+  "packageManager": "pnpm@12.8.1",
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "@lingva/typescript-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "tsdown": "^0.21.0",
+    "typescript": "^5.9.3",
+    "vite": "8.0.16",
+    "vitest": "^4.0.18"
+  }
+}

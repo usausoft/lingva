@@ -1,0 +1,37 @@
+{
+  "name": "@lingva/example-next-starter",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack -p 3100",
+    "build": "tsc --noEmit && next build",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "lingva:check": "lingva check",
+    "lingva:plan": "lingva manifest --output .lingva/artifacts/plan/manifest.json && lingva bundle --locale en --output .lingva/artifacts/plan/en.bundle.json && lingva bundle --locale ru --output .lingva/artifacts/plan/ru.bundle.json",
+    "lingva:push": "lingva push --output-dir .lingva/artifacts/push --api-url \"$LINGVA_PUBLISH_API_URL\" --invalidate",
+    "lingva:sync": "lingva sync",
+    "verify:hosted-env": "node scripts/verify-hosted-env.mjs",
+    "verify:starter": "node scripts/verify-starter.mjs"
+  },
+  "dependencies": {
+    "@lingva/core": "workspace:*",
+    "@lingva/next": "workspace:*",
+    "@lingva/react": "workspace:*",
+    "next": "16.3.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
+  },
+  "devDependencies": {
+    "@lingva/cli": "workspace:*",
+    "@lingva/eslint-config": "workspace:*",
+    "@lingva/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.1.0",
+    "@types/react": "^19.2.10",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3"
+  }
+}

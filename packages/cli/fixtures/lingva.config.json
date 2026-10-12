@@ -1,0 +1,25 @@
+{
+  "validate": {
+    "glob": "*.project.mjs",
+    "failOn": "error"
+  },
+  "validatePolicies": {
+    "strict": {
+      "failOn": "warning"
+    },
+    "advisory": {
+      "failOn": "none",
+      "ignoreCodes": ["missing_locale_translation"]
+    }
+  },
+  "extract": {
+    "extensions": ["ts", "tsx"],
+    "exclude": ["generated", "__tests__"],
+    "failOn": "none"
+  },
+  "extractPolicies": {
+    "ci": {
+      "failOn": "any"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "site": {
+    "footer": {
+      "copyright": "Copyright © Lingva.",
+      "docs": "Docs",
+      "gettingStarted": "Getting Started"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "docs": "Docs"
+    },
+    "searchPlaceholder": "Search documentation...",
+    "tagline": "Language infrastructure for developers",
+    "title": "Lingva Documentation"
+  }
+}

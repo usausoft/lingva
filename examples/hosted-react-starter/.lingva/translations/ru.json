@@ -1,0 +1,15 @@
+{
+  "app": {
+    "badge": "Hosted starter",
+    "cta": "Создать инвайт",
+    "locale": "Локаль",
+    "subtitle": "Начните локально, войдите через Lingva CLI и отправьте те же переводы в hosted delivery.",
+    "title": "Запускайте мультиязычные React flows с Lingva"
+  },
+  "dashboard": {
+    "card": {
+      "body": "Используйте Lingva dashboard для review draft-ов, управления окружениями проекта и отзыва инвайтов.",
+      "title": "Control plane готов"
+    }
+  }
+}

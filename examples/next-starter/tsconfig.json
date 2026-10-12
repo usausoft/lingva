@@ -1,0 +1,22 @@
+{
+  "extends": "../../packages/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@lingva/core": ["../../packages/core/src/index.ts"],
+      "@lingva/react": ["../../packages/react/src/index.tsx"],
+      "@lingva/next": ["../../packages/next/src/index.ts"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "next.config.mjs",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".lingva/generated/**/*.ts",
+    "lingva.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}

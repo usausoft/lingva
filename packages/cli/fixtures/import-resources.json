@@ -1,0 +1,11 @@
+{
+  "resources": {
+    "de": {
+      "hero.subtitle": "Validiere deine Projektvertraege lokal oder in CI."
+    },
+    "fr": {
+      "hero.title": "Demo CLI Lingva",
+      "hero.subtitle": "Validez vos contrats de projet localement ou dans CI."
+    }
+  }
+}

@@ -1,0 +1,203 @@
+name: Standalone CLI Release
+
+on:
+  # Full native proof is explicit; CI calls cli-quality.yml directly.
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Native proof target (tag releases always build every target)
+        type: choice
+        default: all
+        options:
+          - all
+          - windows
+      release_tag:
+        description: Existing immutable CLI tag to complete after verified Windows recovery
+        type: string
+        default: ''
+      original_run_id:
+        description: Original tag run containing four successful Unix archive proofs
+        type: string
+        default: ''
+      windows_proof_run_id:
+        description: Successful Windows-only proof run (reuse without rebuilding)
+        type: string
+        default: ''
+  push:
+    tags:
+      - 'cli/v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cli-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    # Windows-only diagnosis is paired with PR CI's Linux quality proof. Tag
+    # releases still require this gate and the complete native matrix.
+    if: github.event_name != 'workflow_dispatch' || inputs.target != 'windows'
+    uses: ./.github/workflows/cli-quality.yml
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: test
+    if: ${{ !cancelled() && !(github.event_name == 'workflow_dispatch' && inputs.target == 'windows' && inputs.windows_proof_run_id != '') && (needs.test.result == 'success' || (github.event_name == 'workflow_dispatch' && inputs.target == 'windows' && needs.test.result == 'skipped')) && (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/cli/v')) }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(github.event_name == 'workflow_dispatch' && inputs.target == 'windows' && '[{"runner":"windows-latest","target":"x86_64-pc-windows-msvc","archive":"zip"}]' || '[{"runner":"ubuntu-latest","target":"x86_64-unknown-linux-musl","archive":"tar.gz"},{"runner":"ubuntu-24.04-arm","target":"aarch64-unknown-linux-gnu","archive":"tar.gz"},{"runner":"macos-15-intel","target":"x86_64-apple-darwin","archive":"tar.gz"},{"runner":"macos-14","target":"aarch64-apple-darwin","archive":"tar.gz"},{"runner":"windows-latest","target":"x86_64-pc-windows-msvc","archive":"zip"}]') }}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - name: Install musl linker
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get update && sudo apt-get install --yes musl-tools
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+          cache-on-failure: true
+      - name: Test engine contracts on this native operating system
+        run: cargo test --workspace --locked
+      - name: Build release binary
+        run: cargo build --release --locked --target ${{ matrix.target }} --package lingva
+      - name: Package Unix binary
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          mkdir staging
+          cp "target/${{ matrix.target }}/release/lingva" staging/lingva
+          # macOS extended attributes otherwise add a hidden ._lingva member.
+          # Every adapter requires a single regular executable archive entry.
+          COPYFILE_DISABLE=1 tar -C staging -czf "lingva-${{ matrix.target }}.tar.gz" lingva
+      - name: Package Windows binary
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path staging | Out-Null
+          Copy-Item "target/${{ matrix.target }}/release/lingva.exe" staging/lingva.exe
+          Compress-Archive -Path staging/lingva.exe -DestinationPath "lingva-${{ matrix.target }}.zip"
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.8.1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @lingva/core run build
+      - run: pnpm --filter @lingva/cli run build
+      - run: python -m pip install build hatchling
+      - name: Verify Python adapter contracts on Windows
+        if: matrix.target == 'x86_64-pc-windows-msvc'
+        run: |
+          python -m pip install 'sdks/python-cli[dev]'
+          python -m pytest sdks/python-cli/tests
+      - name: Fresh npm and wheel installs with this platform engine
+        env:
+          # Publish the stable SDK dependency before tagging the CLI. No local
+          # core override may mask an incompatible public registry package.
+          LINGVA_SMOKE_PUBLIC_CORE: 1
+        run: node scripts/smoke-cli-packages.mjs lingva-${{ matrix.target }}.${{ matrix.archive }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: lingva-${{ matrix.target }}
+          path: lingva-${{ matrix.target }}.${{ matrix.archive }}
+          if-no-files-found: error
+
+  release:
+    name: Publish complete npm binary channel and GitHub release
+    if: ${{ !cancelled() && ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/cli/v') && needs.build.result == 'success') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.target == 'windows' && inputs.release_tag != '' && inputs.original_run_id != '' && inputs.windows_proof_run_id != '' && needs.build.result == 'skipped')) }}
+    needs: build
+    runs-on: ubuntu-latest
+    environment: Production
+    permissions:
+      contents: write
+      id-token: write
+      actions: read
+    env:
+      CLI_RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
+      CLI_ORIGINAL_RUN_ID: ${{ inputs.original_run_id }}
+      CLI_WINDOWS_PROOF_RUN_ID: ${{ inputs.windows_proof_run_id }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Verify recovery source identity and all native proof records
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/verify-cli-engine-version.mjs
+          node scripts/verify-cli-recovery.mjs
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.8.1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        if: github.event_name == 'push'
+        with:
+          pattern: lingva-*
+          merge-multiple: true
+          path: release
+      - name: Reuse four verified original archives
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/download-artifact@v8
+        with:
+          run-id: ${{ inputs.original_run_id }}
+          github-token: ${{ github.token }}
+          pattern: lingva-*
+          merge-multiple: true
+          path: release
+      - name: Reuse corrected Windows proof archive
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/download-artifact@v8
+        with:
+          run-id: ${{ inputs.windows_proof_run_id }}
+          github-token: ${{ github.token }}
+          name: lingva-x86_64-pc-windows-msvc
+          path: release
+      - name: Add installers and checksums
+        run: |
+          cp packages/cli/lingva-installer.sh release/lingva-installer.sh
+          cp packages/cli/lingva-installer.ps1 release/lingva-installer.ps1
+          cd release
+          sha256sum lingva-* > SHA256SUMS
+          cd ..
+          VERSION="${CLI_RELEASE_TAG#cli/v}"
+          node scripts/render-homebrew-formula.mjs release "$VERSION"
+      - name: Verify immutable release identity
+        run: |
+          node scripts/verify-cli-engine-version.mjs
+          node --input-type=module -e 'import fs from "node:fs"; const p=JSON.parse(fs.readFileSync("packages/cli/package.json")); if(process.env.CLI_RELEASE_TAG!==`cli/v${p.version}`) throw new Error("Tag must match engine and adapter version");'
+      - name: Assemble the public npm binary package
+        run: |
+          mkdir -p packages/cli/assets
+          cp release/lingva-*.tar.gz release/lingva-*.zip release/SHA256SUMS packages/cli/assets/
+          node scripts/verify-cli-release-assets.mjs
+          pnpm --filter @lingva/core run build
+          pnpm --filter @lingva/cli run build
+          pnpm --filter @lingva/cli pack --pack-destination release
+      - name: Publish the checksummed public binary channel
+        # Public source supports provenance with the approved OIDC trusted publisher.
+        run: pnpm --filter @lingva/cli publish --access public --provenance --no-git-checks
+      - name: Verify anonymous public assets
+        run: |
+          node --input-type=module -e 'import fs from "node:fs"; import crypto from "node:crypto"; const p=JSON.parse(fs.readFileSync("packages/cli/package.json")); for(const asset of fs.readdirSync("packages/cli/assets").filter(n=>n.startsWith("lingva-"))){ const r=await fetch(`https://unpkg.com/@lingva/cli@${p.version}/assets/${asset}`); if(!r.ok) throw new Error(`Unavailable public asset ${asset}`); const hash=b=>crypto.createHash("sha256").update(b).digest("hex"); if(hash(Buffer.from(await r.arrayBuffer()))!==hash(fs.readFileSync(`packages/cli/assets/${asset}`))) throw new Error(`Public checksum mismatch ${asset}`); }'
+      - name: Create immutable CLI release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${CLI_RELEASE_TAG}" release/* --verify-tag --generate-notes

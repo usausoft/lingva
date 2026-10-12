@@ -1,0 +1,31 @@
+{
+  "name": "@lingva/example-hosted-react-starter",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3200",
+    "build": "tsc --noEmit && vite build",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "lingva:check": "lingva check",
+    "lingva:push": "lingva push --output-dir .lingva/artifacts/push --api-url \"$LINGVA_PUBLISH_API_URL\" --invalidate",
+    "verify:starter": "node scripts/verify-starter.mjs"
+  },
+  "dependencies": {
+    "@lingva/core": "workspace:*",
+    "@lingva/react": "workspace:*",
+    "@vitejs/plugin-react": "^5.1.1",
+    "vite": "^8.0.5",
+    "typescript": "^5.9.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@lingva/cli": "workspace:*",
+    "@lingva/eslint-config": "workspace:*",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.2"
+  }
+}

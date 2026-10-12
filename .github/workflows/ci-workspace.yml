@@ -1,0 +1,44 @@
+name: Scoped workspace verification
+
+on:
+  workflow_call:
+    inputs:
+      packages:
+        type: string
+        required: true
+      files:
+        type: string
+        required: true
+      repo_checks:
+        type: boolean
+        default: false
+    secrets:
+      ALGOLIA_APP_ID:
+        required: false
+      ALGOLIA_API_KEY:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      CI_PACKAGES: ${{ inputs.packages }}
+      CI_FILES: ${{ inputs.files }}
+      CI_REPO_CHECKS: ${{ inputs.repo_checks }}
+      ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+      ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 12.8.1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/ci-run-workspace.mjs

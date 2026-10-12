@@ -1,0 +1,29 @@
+{
+  "name": "@lingva/example-vue-starter",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 3300",
+    "build": "vue-tsc --noEmit && vite build",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "vue-tsc --noEmit",
+    "lingva:check": "lingva check",
+    "lingva:push": "lingva push --output-dir .lingva/artifacts/push --api-url \"$LINGVA_PUBLISH_API_URL\" --invalidate",
+    "verify:starter": "node scripts/verify-starter.mjs"
+  },
+  "dependencies": {
+    "@lingva/core": "workspace:*",
+    "@lingva/vue": "workspace:*",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "vite": "^8.0.5",
+    "vue": "^3.5.13",
+    "typescript": "^5.9.3"
+  },
+  "devDependencies": {
+    "@lingva/cli": "workspace:*",
+    "@lingva/eslint-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "vue-tsc": "^2.2.10"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "@lingva/example-nuxt-starter",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --host 127.0.0.1 --port 3600",
+    "build": "nuxt build",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "nuxt prepare && nuxt typecheck",
+    "lingva:check": "lingva check",
+    "verify:starter": "node scripts/verify-starter.mjs"
+  },
+  "dependencies": {
+    "@lingva/core": "workspace:*",
+    "@lingva/vue": "workspace:*",
+    "nuxt": "4.5.2",
+    "vue": "^3.5.39"
+  },
+  "devDependencies": {
+    "@babel/core": "7.29.6",
+    "@lingva/cli": "workspace:*",
+    "@lingva/eslint-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "rolldown": "1.2.1",
+    "typescript": "^5.9.3"
+  }
+}

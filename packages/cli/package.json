@@ -1,0 +1,69 @@
+{
+  "name": "@lingva/cli",
+  "version": "0.1.5",
+  "description": "Command-line tooling for Lingva localization projects",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "registry": "https://registry.npmjs.org"
+  },
+  "homepage": "https://lingva.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usausoft/lingva.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/usausoft/lingva/issues"
+  },
+  "keywords": [
+    "i18n",
+    "localization",
+    "translations",
+    "cli"
+  ],
+  "bin": {
+    "lingva": "./dist/native-launcher.mjs"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.mts"
+    }
+  },
+  "files": [
+    "assets",
+    "dist",
+    "checksums.mjs",
+    "install-native.mjs",
+    "lingva-installer.ps1",
+    "lingva-installer.sh"
+  ],
+  "lingvaEngineVersion": "0.1.5",
+  "scripts": {
+    "build": "node ../../scripts/build-package.mjs --copy-cli-templates",
+    "dev": "LINGVA_DEV_BUILD=true tsdown --watch",
+    "lint": "eslint src --max-warnings 0",
+    "test": "node --import tsx --test src/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist vendor",
+    "postinstall": "node install-native.mjs",
+    "prepublishOnly": "node ../../scripts/verify-cli-release-assets.mjs"
+  },
+  "dependencies": {
+    "@lingva/core": "workspace:*",
+    "typescript": "^5.9.3",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.1.0",
+    "@lingva/eslint-config": "workspace:*",
+    "@lingva/typescript-config": "workspace:*",
+    "eslint": "^9.39.2",
+    "tsdown": "^0.21.0",
+    "tsx": "^4.20.6"
+  }
+}

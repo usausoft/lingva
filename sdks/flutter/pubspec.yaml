@@ -1,0 +1,25 @@
+name: lingva_flutter
+description: Preview Flutter adapter for versioned Lingva locale bundles.
+version: 0.1.0-dev.1
+publish_to: none
+homepage: https://lingva.dev
+repository: https://github.com/usausoft/lingva/tree/main/sdks/flutter
+issue_tracker: https://github.com/usausoft/lingva/issues
+topics:
+  - i18n
+  - internationalization
+  - localization
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: false

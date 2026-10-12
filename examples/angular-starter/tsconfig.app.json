@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "outDir": "./out-tsc/app", "types": [] },
+  "files": [
+    "src/main.ts",
+    "src/app.component.ts",
+    "src/lingva/providers.ts",
+    ".lingva/generated/project.ts",
+    "lingva.config.ts"
+  ],
+  "include": ["src/**/*.d.ts"]
+}

@@ -1,0 +1,98 @@
+name: Consumer CI
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+    tags-ignore: ['*']
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: consumer-ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.route.outputs.packages }}
+      files: ${{ steps.route.outputs.files }}
+      workspace: ${{ steps.route.outputs.workspace }}
+      cli: ${{ steps.route.outputs.cli }}
+      docs: ${{ steps.route.outputs.docs }}
+      python: ${{ steps.route.outputs.python }}
+      flutter: ${{ steps.route.outputs.flutter }}
+      kotlin: ${{ steps.route.outputs.kotlin }}
+      swift: ${{ steps.route.outputs.swift }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: node --test scripts/ci-plan.test.mjs
+      - id: route
+        run: node scripts/ci-plan.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  workspace:
+    needs: plan
+    if: needs.plan.outputs.workspace == 'true'
+    uses: ./.github/workflows/ci-workspace.yml
+    with:
+      packages: ${{ needs.plan.outputs.packages }}
+      files: ${{ needs.plan.outputs.files }}
+      repo_checks: true
+    secrets:
+      ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+      ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+  cli:
+    needs: plan
+    if: needs.plan.outputs.cli == 'true'
+    uses: ./.github/workflows/cli-quality.yml
+  docs:
+    needs: plan
+    if: needs.plan.outputs.docs == 'true'
+    uses: ./.github/workflows/ci-workspace.yml
+    with:
+      packages: '["@lingva/docs"]'
+      files: ${{ needs.plan.outputs.files }}
+    secrets:
+      ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+      ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+  python:
+    needs: plan
+    if: needs.plan.outputs.python == 'true'
+    uses: ./.github/workflows/native-sdk-previews.yml
+    with:
+      sdk: python
+  swift:
+    needs: plan
+    if: needs.plan.outputs.swift == 'true'
+    uses: ./.github/workflows/native-sdk-previews.yml
+    with:
+      sdk: swift
+  kotlin:
+    needs: plan
+    if: needs.plan.outputs.kotlin == 'true'
+    uses: ./.github/workflows/native-sdk-previews.yml
+    with:
+      sdk: kotlin
+  flutter:
+    needs: plan
+    if: needs.plan.outputs.flutter == 'true'
+    uses: ./.github/workflows/native-sdk-previews.yml
+    with:
+      sdk: flutter
+  complete:
+    name: CI complete
+    if: always()
+    needs: [plan, workspace, cli, docs, python, swift, kotlin, flutter]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require successful affected checks
+        env:
+          CI_RESULTS: ${{ toJSON(needs) }}
+        run: >-
+          node -e 'const r=JSON.parse(process.env.CI_RESULTS);if(r.plan.result!=="success"||Object.values(r).some(j=>!["success","skipped"].includes(j.result)))process.exit(1)'

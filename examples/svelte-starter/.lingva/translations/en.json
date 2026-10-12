@@ -1,0 +1,10 @@
+{
+  "app": {
+    "badge": "Svelte starter",
+    "locale": "Locale",
+    "localeEnglish": "English",
+    "localeRussian": "Russian",
+    "subtitle": "Use reactive Lingva stores without maintaining a second translation runtime.",
+    "title": "Build multilingual Svelte apps with Lingva"
+  }
+}

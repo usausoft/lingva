@@ -1,0 +1,64 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Local env files
+.env*
+!.env*.example
+.npmrc.private
+
+# Testing
+coverage
+.lingva/local-remote/
+**/.lingva/remote-state.json
+**/.lingva/translation-transaction.lock
+**/.lingva/translation-transaction.json
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Build Outputs
+target/
+.angular/
+.next/
+.docusaurus/
+.docusaurus/
+.nuxt/
+.output/
+.svelte-kit/
+.build/
+.dart_tool/
+.gradle/
+out/
+build
+dist
+packages/cli/assets/
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+venv/
+
+# Native SDK package-manager state
+.flutter-plugins
+.flutter-plugins-dependencies
+sdks/flutter/pubspec.lock
+
+
+# Debug
+npm-debug.log*
+
+# Misc
+.DS_Store
+*.pem
+.env*.local
+
+.pnpm-store/

@@ -1,0 +1,37 @@
+name: Publish Python CLI adapter
+
+on:
+  push:
+    tags: ['python-cli/v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify adapter identity
+        run: |
+          node scripts/verify-cli-engine-version.mjs
+          python -c 'import os,tomllib,pathlib; v=tomllib.loads(pathlib.Path("sdks/python-cli/pyproject.toml").read_text())["project"]["version"]; assert os.environ["GITHUB_REF_NAME"] == "python-cli/v" + v'
+      - name: Test and build independent adapter
+        run: |
+          python -m pip install build 'sdks/python-cli[dev]'
+          python -m pytest sdks/python-cli/tests --cov=lingva_cli --cov-branch --cov-fail-under=100 --cov-report=term-missing
+          python -m build sdks/python-cli
+      - name: Verify wheel against anonymous pinned public engine
+        run: |
+          python -m venv /tmp/lingva-wheel
+          /tmp/lingva-wheel/bin/python -m pip install sdks/python-cli/dist/*.whl
+          /tmp/lingva-wheel/bin/lingva --version
+          /tmp/lingva-wheel/bin/lingva init --mode local --no-auth --sdk python --project-id release-smoke --locale en,ru --dry-run
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: sdks/python-cli/dist/

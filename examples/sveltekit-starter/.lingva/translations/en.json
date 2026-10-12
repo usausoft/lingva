@@ -1,0 +1,10 @@
+{
+  "app": {
+    "badge": "SvelteKit SSR starter",
+    "locale": "Locale",
+    "localeEnglish": "English",
+    "localeRussian": "Russian",
+    "subtitle": "Each server load owns and disposes its Lingva runtime before returning serializable page data.",
+    "title": "Render multilingual SvelteKit apps safely"
+  }
+}

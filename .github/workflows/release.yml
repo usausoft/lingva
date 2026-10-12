@@ -1,0 +1,144 @@
+name: Public SDK Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  NODE_VERSION: 24
+  NPM_CONFIG_PROVENANCE: true
+  PNPM_VERSION: 12.8.1
+
+jobs:
+  verify:
+    name: Verify and select release mode
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      mode: ${{ steps.release-mode.outputs.mode }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js and public npm registry
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit production dependencies
+        run: pnpm audit:prod
+
+      - name: Verify public SDK quality
+        env:
+          # CLI native proof and application deployments have separate gates.
+          CI_PACKAGES: '["@lingva/core","@lingva/js","@lingva/node","@lingva/react","@lingva/next","@lingva/angular","@lingva/vue","@lingva/svelte","@lingva/docusaurus","@lingva/electron"]'
+        run: |
+          pnpm build:packages
+          pnpm lint:repo
+          pnpm format:check
+          node scripts/ci-run-workspace.mjs
+          pnpm verify:packages
+
+      - name: Verify immutable SDK release identity
+        if: ${{ github.ref_type == 'tag' }}
+        run: node --input-type=module -e 'import fs from "node:fs"; const version=JSON.parse(fs.readFileSync("packages/core/package.json")).version; if(process.env.GITHUB_REF_NAME!==`v${version}`) throw new Error("SDK tag must match package version"); for(const name of JSON.parse(process.env.CI_PACKAGES)){if(JSON.parse(fs.readFileSync(`packages/${name.slice(8)}/package.json`)).version!==version) throw new Error(`SDK version mismatch ${name}`);}'
+        env:
+          CI_PACKAGES: '["@lingva/core","@lingva/js","@lingva/node","@lingva/react","@lingva/next","@lingva/angular","@lingva/vue","@lingva/svelte","@lingva/docusaurus","@lingva/electron"]'
+
+      - name: Select version or publish mode
+        id: release-mode
+        if: ${{ github.ref_type == 'branch' }}
+        uses: changesets/action/select-mode@v2
+
+  version:
+    name: Create or update release pull request
+    if: ${{ github.ref_type == 'branch' && github.ref_name == 'main' && needs.verify.outputs.mode == 'version' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Version public packages
+        uses: changesets/action/version@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: pnpm version-packages
+
+  publish:
+    name: Publish public packages
+    # The reviewed Changesets version PR lands on main first. Publishing only
+    # begins when an operator creates a protected v* tag on that exact commit.
+    if: ${{ github.ref_type == 'tag' }}
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: Production
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js and public npm registry
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish with npm trusted publishing
+        uses: changesets/action/publish@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: pnpm release

@@ -1,0 +1,15 @@
+{
+  "app": {
+    "badge": "Vue starter",
+    "cta": "Create an invite",
+    "locale": "Locale",
+    "subtitle": "Start locally, sign in with Lingva CLI, then push the same translations to hosted delivery.",
+    "title": "Ship multilingual Vue flows with Lingva"
+  },
+  "dashboard": {
+    "card": {
+      "body": "Use the Lingva dashboard to review drafts, manage project environments, and revoke invites.",
+      "title": "Control plane ready"
+    }
+  }
+}

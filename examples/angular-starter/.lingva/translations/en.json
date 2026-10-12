@@ -1,0 +1,10 @@
+{
+  "app": {
+    "badge": "Angular starter",
+    "locale": "Locale",
+    "localeEnglish": "English",
+    "localeRussian": "Russian",
+    "subtitle": "Use Angular signals and dependency injection without duplicating translation state.",
+    "title": "Build multilingual Angular apps with Lingva"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "extends": "@lingva/typescript-config/base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "outDir": "./dist",
+    "paths": {
+      "@lingva/core": ["../core/src/index.ts"],
+      "@lingva/react": ["../react/src/index.tsx"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tsdown.config.ts"]
+}
