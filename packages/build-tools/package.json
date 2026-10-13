@@ -1,0 +1,35 @@
+{
+  "name": "@lingva/build-tools",
+  "version": "0.1.0",
+  "description": "Shared protected package builds for Lingva workspaces",
+  "type": "module",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "files": [
+    "build-package.mjs",
+    "protect-build.mjs",
+    "config.mjs",
+    "config.d.mts"
+  ],
+  "bin": {
+    "lingva-build": "./build-package.mjs"
+  },
+  "exports": {
+    "./build": "./build-package.mjs",
+    "./config": {
+      "types": "./config.d.mts",
+      "import": "./config.mjs"
+    }
+  },
+  "peerDependencies": {
+    "tsdown": "^0.21.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usausoft/lingva.git",
+    "directory": "packages/build-tools"
+  }
+}

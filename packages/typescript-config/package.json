@@ -1,6 +1,19 @@
 {
   "name": "@lingva/typescript-config",
-  "version": "0.0.1",
-  "private": true,
-  "license": "PROPRIETARY"
+  "version": "0.1.0",
+  "license": "PROPRIETARY",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usausoft/lingva.git",
+    "directory": "packages/typescript-config"
+  },
+  "files": [
+    "base.json",
+    "nextjs.json",
+    "react-library.json"
+  ]
 }

@@ -20,5 +20,5 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@lingva/cli"]
+  "ignore": ["@lingva/cli", "@lingva/build-tools", "@lingva/eslint-config", "@lingva/typescript-config"]
 }
