@@ -35,10 +35,6 @@ next product phases.
 - [x] Hosted bundle manifest service
 - [x] First hosted draft review queue and approval surface
 - [x] Typed project and environment contract for hosted control-plane state
-- [x] Hosted project and environment API boundary
-- [x] Admin project inventory backed by the hosted control-plane BFF
-- [x] Admin environment management backed by the hosted control-plane BFF
-- [x] Hosted invite list/create/revoke API boundary
 - [x] Dashboard-driven invite and access workflows
 - [x] Publish history and rollback support
 - [x] First delivery operations dashboard for history, refresh, and rollback
@@ -47,9 +43,6 @@ next product phases.
 - [x] Delivery workflow dispatch from admin operations for plan and publish runs
 - [x] Recent workflow status after admin-triggered delivery runs
 - [x] Stage-aware workflow run filtering and GitHub run links
-- [x] Multi-app delivery workflow targets for `web`, `docs`, `dev`, and custom configs
-- [x] App-scoped hosted publish endpoint and token fallback wiring
-- [x] Admin dispatch preview for app, config, mode, stage, and credential scope
 - [x] Richer delivery workflow diagnostics from job summaries and artifacts
 - [x] Environment-aware publish targets for `dev`, `stage`, and `prod`
 - [x] Runtime memory TTL and background refresh policies
@@ -70,7 +63,6 @@ next product phases.
 - [x] Versioned native bundle contract with Swift, Kotlin, and Flutter source previews
 - [x] Python translation runtime and authenticated hosted loading
 - [x] Separate Python CLI adapter implemented for all Rust customer commands
-- [ ] Publish CLI 0.1.4 and runtime-only Python SDK 0.1.5; older releases bundle a CLI launcher
 - [ ] Publish and stabilize the Swift, Kotlin, and Flutter packages in their ecosystem registries
 - [x] First local-mode CI recipe through `lingva init --ci github`
 - [ ] Broader CI recipes for monorepos and multi-app workspaces
@@ -88,12 +80,8 @@ next product phases.
 - [x] Public SDK package boundary with minified, source-map-free artifacts
 - [x] Changesets versioning and npm trusted-publishing workflow
 - [ ] Complete the first coordinated public npm release and verify provenance
-- [x] Stage-first deployment, secrets, rollback, and release runbooks
-- [x] Hosted auth route rate-limit boundary
 - [ ] Full plan-aware capability enforcement beyond the current backend-enforced
       Free quotas, including the 100-distinct-translation-key project limit
-- [x] Dedicated AWS accounts for dev, stage, and prod infrastructure
-- [ ] Verify deployed isolation, rollback and access protections before each release
 
 ## Longer-term product bets
 

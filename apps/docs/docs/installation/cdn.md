@@ -38,12 +38,11 @@ server requests should pass explicit config to a request-owned runtime.
 
 Customers should copy the complete bundle URL from **Consumer application
 setup** at `/app/projects/<project-id>`; no AWS access or infrastructure output
-lookup is required. Lingva operators can derive the same URL from the stack's
-`PublishArtifactsApiUrl` output. Its authenticated current-bundle routes are:
+lookup is required. The delivery endpoint supports these current-bundle routes:
 
 ```text
-GET {PublishArtifactsApiUrl}/bundles/{projectId}/{environment}/latest/manifest.json
-GET {PublishArtifactsApiUrl}/bundles/{projectId}/{environment}/latest/{locale}.bundle.json
+GET {deliveryBaseUrl}/bundles/{projectId}/{environment}/latest/manifest.json
+GET {deliveryBaseUrl}/bundles/{projectId}/{environment}/latest/{locale}.bundle.json
 ```
 
 The URLs are public addresses, but requests are authenticated. The runtime
@@ -52,11 +51,9 @@ grant only `delivery:read`; never expose project-administration, authoring, or
 publishing credentials. Applications with stricter requirements should proxy
 delivery through their authenticated backend.
 
-Deploy the current infrastructure stack before using these routes. Add every
-browser origin that should read bundles to `LINGVA_BUNDLES_CORS_ORIGINS`; native
-and server consumers are not restricted by browser CORS. Publish and
-invalidation requests to the same Function URL require their corresponding
-write scopes.
+Ask your workspace administrator to enable your browser origins before
+loading bundles from a browser. Native and server consumers are not restricted
+by browser CORS. Publishing and invalidation require separate write scopes.
 
 The runtime URL may include the project, environment, locale, and publish
 identifiers supported by another delivery endpoint. See
