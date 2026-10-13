@@ -546,42 +546,22 @@ lingva approve ./lingva.config.yaml \
 Keep `--auth-token` for CI, break-glass automation, or service-token based
 jobs. Do not expose those service tokens to browser code.
 
-Hosted authoring and publish endpoints accept stored CLI bearer tokens only
-when the backend has JWT verification configured. With the bundled AWS stack,
-the stack configures the Cognito user-pool JWT issuer and app-client checks.
-`COGNITO_DOMAIN_PREFIX` separately enables the Hosted UI/OAuth login endpoints;
-that hosted domain is not the JWT `iss` value.
-The deployment requires `LINGVA_AUTHORING_ALLOWED_GROUPS`,
-`LINGVA_CONTROL_PLANE_ALLOWED_GROUPS`, and `LINGVA_PUBLISH_ALLOWED_GROUPS`.
-They limit which Cognito groups can use user tokens and fail closed when empty;
-service tokens remain available for CI and server-only dashboard automation.
+For hosted projects, use `lingva auth login` to discover OAuth settings from
+Lingva. Select another hosted deployment with `--platform-url` when needed.
 
-If you deploy the bundled AWS infrastructure with Cognito Hosted UI, set a
-stage-specific `COGNITO_DOMAIN_PREFIX` and keep the separate
-`COGNITO_CLI_APP_CLIENT_NAME` / `COGNITO_CLI_CALLBACK_URLS` values. The stack
-then emits `UserPoolHostedUiIssuerUrl` and `CliUserPoolClientId`, which map
-directly to the CLI flags:
+```bash
+lingva auth login
+```
+
+For a custom OAuth provider, obtain the issuer URL and CLI client ID from your
+workspace administrator. The client must support PKCE and the CLI loopback
+callback. Pass those values explicitly:
 
 ```bash
 lingva auth login \
-  --issuer-url <UserPoolHostedUiIssuerUrl> \
-  --client-id <CliUserPoolClientId>
+  --issuer-url "$LINGVA_CLI_AUTH_ISSUER_URL" \
+  --client-id "$LINGVA_CLI_AUTH_CLIENT_ID"
 ```
-
-The normal web Cognito app client remains separate from the CLI client so local
-PKCE loopback callbacks do not need to be registered on browser-facing app
-clients.
-
-Maintainers using the bundled infrastructure can print those values directly
-from CloudFormation:
-
-```bash
-pnpm --filter @lingva/infrastructure-aws auth:env:dev
-```
-
-Use `auth:env:stage` or `auth:env:prod` for the matching deployed stage. The
-command is read-only and prints shell exports plus the final `lingva auth login`
-command.
 
 Useful auth commands:
 

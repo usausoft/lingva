@@ -193,6 +193,13 @@ test('hosted login examples use platform-discovered OAuth metadata', async () =>
   assert.match(contents.join('\n'), /--platform-url https:\/\/stage\.lingva\.dev/u);
 });
 
+test('customer configuration documents login without operator deployment commands', async () => {
+  const configuration = await readRepositoryFile('apps/docs/docs/installation/configuration.md');
+  assert.match(configuration, /lingva auth login\n/u);
+  assert.match(configuration, /workspace administrator/u);
+  assert.doesNotMatch(configuration, /CloudFormation|COGNITO_|auth:env:/u);
+});
+
 test('public docs and Python enforce the shared translation-key contract', async () => {
   const [configuration, pythonGuide, pythonLocal] = await Promise.all(
     [

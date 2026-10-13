@@ -24,6 +24,7 @@ allowBuilds:
 # Keep security pins centralized so every workspace and CI job resolves the
 # same patched transitive versions.
 overrides:
+  'postcss-selector-parser@>=7.0.0 <7.1.6': 7.1.6
   '@hono/node-server': 1.19.13
   '@babel/plugin-transform-modules-systemjs': 7.29.4
   fast-uri: 3.1.8

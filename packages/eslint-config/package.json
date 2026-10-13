@@ -1,8 +1,7 @@
 {
   "name": "@lingva/eslint-config",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
-  "private": true,
   "license": "PROPRIETARY",
   "exports": {
     "./base": "./base.js",
@@ -14,7 +13,16 @@
   "scripts": {
     "lint": "eslint . --max-warnings 0"
   },
-  "devDependencies": {
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usausoft/lingva.git",
+    "directory": "packages/eslint-config"
+  },
+  "dependencies": {
     "@eslint/js": "^9.39.2",
     "@next/eslint-plugin-next": "^16.1.6",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
@@ -29,5 +37,12 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0",
     "vue-eslint-parser": "^10.4.0"
-  }
+  },
+  "files": [
+    "base.js",
+    "next.js",
+    "node.js",
+    "react-internal.js",
+    "vue.js"
+  ]
 }
