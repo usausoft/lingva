@@ -10,23 +10,23 @@ import TabItem from '@theme/TabItem';
 Use `@lingva/js` when you want Lingva outside React: plain browser code, CLI-side
 helpers, build scripts, or site configuration like Docusaurus.
 
-## Get Started
+## Get Started {#get-started}
 
-### 1. Install the package
+### 1. Install the package {#1-install-the-package}
 
 <Tabs groupId="package-manager">
   <TabItem value="pnpm" label="pnpm" default>
 
 ```bash
-pnpm add @lingva/js
-pnpm add --save-dev --allow-build @lingva/cli @lingva/cli
+pnpm add @lingva/js @lingva/core
+pnpm add --save-dev --allow-build=@lingva/cli @lingva/cli
 ```
 
   </TabItem>
   <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn add @lingva/js
+yarn add @lingva/js @lingva/core
 yarn add --dev @lingva/cli
 ```
 
@@ -34,7 +34,7 @@ yarn add --dev @lingva/cli
   <TabItem value="npm" label="npm">
 
 ```bash
-npm install @lingva/js
+npm install @lingva/js @lingva/core
 npm install --save-dev @lingva/cli
 ```
 
@@ -47,7 +47,7 @@ Cargo, and PyPI installs. Package installation fails clearly when the matching
 checksummed binary cannot be installed; customer commands never fall back to a
 second JavaScript implementation.
 
-### 2. Define project resources
+### 2. Define project resources {#2-define-project-resources}
 
 ```ts
 import { createLingvaResources, defineLingvaProject } from '@lingva/core';
@@ -74,7 +74,7 @@ export const project = defineLingvaProject({
 });
 ```
 
-### 3. Create a JavaScript runtime
+### 3. Create a JavaScript runtime {#3-create-a-javascript-runtime}
 
 ```ts
 import { createLingvaJsRuntime } from '@lingva/js';
@@ -106,7 +106,7 @@ environment; there is no shared API hostname to guess. For browser code, use
 the setup page's `delivery:read` SDK key and your framework's public build-time
 environment convention. Never expose a write/admin key in a client bundle.
 
-### 4. Translate strings
+### 4. Translate strings {#4-translate-strings}
 
 ```ts
 lingva.tSync('welcome.title');
@@ -125,18 +125,19 @@ the locale before synchronous lookups; `setLocale` alone does not fetch:
 await lingva.loadLocale('en');
 console.log(lingva.tSync('welcome.title'));
 await lingva.loadLocale('de');
-lingva.setLocale('de');
-console.log(await lingva.t('welcome.title'));
+console.log(lingva.tSync('welcome.title'));
 ```
 
 Subscribe with `lingva.subscribe(listener)` and retain its returned unsubscribe
 function. Unsubscribe and call `lingva.destroy()` when the owning view/request
 ends. `preload(keys, locale, { signal })` accepts a caller `AbortSignal`;
-`loadLocale(locale)` instead owns cancellation internally and aborts the previous
-locale load. Failures appear in runtime state. See the
+`loadLocale(locale)` selects the locale, owns cancellation internally, and aborts
+the previous locale load. Its failures appear in `getSnapshot()` and subscriber
+notifications, and reject its returned promise. `preload` failures reject its
+promise; they do not update that loading/error snapshot. See the
 [configuration reference](./configuration.md) for delivery and cancellation.
 
-## Advanced
+## Advanced {#advanced}
 
 `@lingva/js` is also a good fit for config-driven surfaces.
 

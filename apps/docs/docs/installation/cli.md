@@ -8,13 +8,13 @@ The Rust `lingva` engine owns all customer commands. `@lingva/cli` (npm) and
 `lingva-cli` (Python) install and launch the same engine. `lingva-sdk` is the
 Python application runtime, not the CLI installer.
 
-This reference describes CLI `0.1.4` and runtime-only Python SDK
+This reference describes CLI `0.1.5` and runtime-only Python SDK
 `0.1.5`. Older installed packages may have a smaller command
 surface. Check `lingva --version` and `lingva <command> --help`.
 
-## Installation and configuration
+## Installation and configuration {#installation-and-configuration}
 
-### Homebrew (macOS and Linux)
+### Homebrew (macOS and Linux) {#homebrew-macos-and-linux}
 
 ```bash
 brew install usausoft/tap/lingva
@@ -23,7 +23,7 @@ lingva --help
 ```
 
 The [public tap](https://github.com/usausoft/homebrew-tap) installs the same Rust
-engine, including an Apple Silicon binary. The commands below require **0.1.4**
+engine, including an Apple Silicon binary. The commands below require **0.1.5**
 or newer; use `lingva --version` to verify after upgrading.
 Update with `brew update && brew upgrade lingva`;
 remove with `brew uninstall lingva`.
@@ -35,12 +35,12 @@ their public archives and checksums are available; it never downgrades the seed.
 The initial 0.1.3 archives are hosted publicly in the tap, unchanged from the
 original GitHub release. No private GitHub credentials are needed to install.
 
-### npm, Python, or Rust
+### npm, Python, or Rust {#npm-python-or-rust}
 
 Choose one installation route:
 
 ```bash
-pnpm add -D --allow-build @lingva/cli @lingva/cli@0.1.4
+pnpm add -D --allow-build=@lingva/cli @lingva/cli@0.1.5
 pnpm exec lingva --version
 
 python -m pip install lingva-cli
@@ -123,7 +123,7 @@ Normalized JSON exports can also serve as configs, with `resources` mapping
 locale IDs to dictionaries. `apply`, `approve`, `sync`, and ordinary `pull`
 update that inline resource owner instead of unused shadow locale files.
 
-## Authentication: `auth`
+## Authentication: `auth` {#authentication-auth}
 
 Hosted commands accept `--api-url` and `--auth-token` overrides. Explicit tokens
 take precedence over environment/config keys and stored credentials. Keep tokens
@@ -153,7 +153,7 @@ lingva auth login --device --device-url "$DEVICE_AUTH_URL" \
   --issuer-url "$ISSUER" --client-id "$CLIENT_ID"
 ```
 
-## Setup and upgrades: `init`, `update`
+## Setup and upgrades: `init`, `update` {#setup-and-upgrades-init-update}
 
 ```bash
 # Authenticated remote setup, default mode; discovers visible projects.
@@ -195,7 +195,7 @@ Use `--channel standalone|npm|python|homebrew|cargo` or
 pin both the installer and binary asset version. Generated Linux CI checks also
 pin the generating engine version. Homebrew upgrades still depend on tap availability.
 
-## Local authoring: `sync`, `check`, `validate`, `metadata`, `apply`
+## Local authoring: `sync`, `check`, `validate`, `metadata`, `apply` {#local-authoring-sync-check-validate-metadata-apply}
 
 ```bash
 lingva sync
@@ -255,7 +255,7 @@ Variant IDs are unique. Flattened keys are at most 200 ASCII characters, start
 with a letter/digit, use only letters, digits, `.`, `_`, `-`, and never contain
 consecutive or trailing dots. Dotted/nested key collisions are errors.
 
-## Reports and generated artifacts
+## Reports and generated artifacts {#reports-and-generated-artifacts}
 
 ```bash
 lingva manifest --format json --output artifacts/manifest.json
@@ -288,7 +288,7 @@ file in a browser, edit strings or variant arrays, export a locale, then use
 `apply`. Editing the HTML does not save to your repository or hosted project.
 It is a JSON editor, not the hosted translation dashboard.
 
-## Static source checks: `extract`
+## Static source checks: `extract` {#static-source-checks-extract}
 
 ```bash
 lingva extract src --format json --output artifacts/usage.json
@@ -312,7 +312,7 @@ symlinks are skipped. Globs support `*` and `?`, not regular expressions.
 dynamic calls. Missing/unused comparisons need `--project`; dynamic checks do not.
 `--config` supplies an alternate project config for extraction policy settings.
 
-## Hosted transfer: `pull`, `push`, `publish`, `invalidate`
+## Hosted transfer: `pull`, `push`, `publish`, `invalidate` {#hosted-transfer-pull-push-publish-invalidate}
 
 ```bash
 lingva pull --locale ru --format json
@@ -358,7 +358,7 @@ lingva publish --local-only --output-dir artifacts/plan
 Directory validation globs select portable YAML/JSON configs only; the npm bridge
 does not recursively evaluate every executable config matched inside a directory.
 
-## Hosted review: `drafts`, `approve`
+## Hosted review: `drafts`, `approve` {#hosted-review-drafts-approve}
 
 ```bash
 lingva drafts --api-url "$AUTHORING_URL" --locale ru --status draft \
@@ -388,7 +388,7 @@ Authoring and publishing may use separate endpoints/tokens. Retry the failed
 step after resolving its error; local application and remote approval are not
 a distributed transaction.
 
-## Automation
+## Automation {#automation}
 
 Prefer `--format json` for report commands. `--output` persists the report or
 artifact where supported. `--no-summary` suppresses human summary lines, not

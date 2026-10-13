@@ -10,7 +10,7 @@ Use `/app` to manage projects and translation delivery; use the
 This page describes implemented features. A deployment may disable optional
 email, billing, authoring, promotion, or delivery integrations.
 
-## Account and access
+## Account and access {#account-and-access}
 
 Sign up/sign in using the platform's Cognito flow. Confirmation and password
 reset are account operations, not project invitations. Signup may be public,
@@ -29,7 +29,7 @@ Project roles have distinct permissions:
 Destructive project deletion requires ownership. Internal support access is not
 an ownership bypass. Platform roles are separate from these project roles.
 
-## Projects and environments
+## Projects and environments {#projects-and-environments}
 
 1. Open `/app/projects`, create a project, and choose its default/target locales.
 2. Open `/app/projects/<project-id>` to edit allowed project fields and manage locales.
@@ -38,10 +38,12 @@ an ownership bypass. Platform roles are separate from these project roles.
 
 Environment records describe local/remote delivery and publish endpoints.
 The setup panel supplies values; customers do not need AWS console access.
-Deleting a locale does not erase historical drafts/bundles, but it removes it
-from active project delivery. Review consumer code before changing locale scope.
+Removing a locale updates the configured locale list; it does not erase historical
+drafts or already-published bundles. Existing bundle URLs may remain accessible.
+Change the default locale before removing it, and review consumer code before
+changing locale scope.
 
-## SDK keys and CLI setup
+## SDK keys and CLI setup {#sdk-keys-and-cli-setup}
 
 Create a read-scoped SDK key in **Consumer application setup**. The token is
 shown once; copy it immediately. Browser keys must have only `delivery:read`.
@@ -60,7 +62,7 @@ Kotlin and Flutter packages remain source previews; their default refresh APIs
 do not attach credentials. Use packaged bundles or application-owned authenticated
 loading as described in [native bundles](./installation/native-bundles.md).
 
-## Translation editing and review
+## Translation editing and review {#translation-editing-and-review}
 
 Open `/app/translations` and select a project and locale. The authoring environment
 comes from deployment configuration; this page has no environment selector. Search keys and
@@ -89,7 +91,7 @@ without uploading to configured endpoints. Review partial-failure behavior in
 the CLI reference before retrying. These CLI flags do not change the direct/local
 platform promotion behavior described above.
 
-## Members and invitations
+## Members and invitations {#members-and-invitations}
 
 Owners/admins manage members and invitations through workspace settings.
 Create a role-scoped invitation and copy its link. Email-addressed invitations
@@ -103,7 +105,7 @@ configure a verified sender. Email delivery failure does not destroy the created
 invitation: copy and send the returned link manually. Do not assume an absent
 email means invitation creation failed.
 
-## Delivery operations
+## Delivery operations {#delivery-operations}
 
 Inspect publish history, current delivery, invalidations and rollback history in
 the delivery surface. Publishing stores versioned bundles; invalidation records
@@ -116,7 +118,7 @@ the last common revision and rejects stale writes with HTTP 409. Identical mutat
 retries are idempotent. Use `--force` on push only for an intentional overwrite.
 Keep `.lingva/remote-state.json` private to the repository working copy and gitignored.
 
-## Limits, activity, and billing
+## Limits, activity, and billing {#limits-activity-and-billing}
 
 The backend enforces Free project limits: one owned project, five members per
 project, three active API keys, and 100 distinct translation keys. Translation-key
@@ -125,7 +127,7 @@ do not consume active-key quota.
 
 Active-key limits are Free 3, Plus 10, Pro 50, Business 250 and Internal 1000. Existing
 keys are not automatically deleted on a downgrade; creation stays blocked while
-the count exceeds the new limit. This is not a promise that every other paid
+the count meets or exceeds the new limit. This is not a promise that every other paid
 capability or subscription lifecycle is implemented.
 
 Project activity provides an audit trail for supported operations. Billing screens
@@ -133,7 +135,7 @@ and optional Stripe infrastructure are a scaffold/opt-in integration, not a
 completed automated subscription lifecycle. Contact the operator for available
 plans and enabled capabilities.
 
-## Troubleshooting
+## Troubleshooting {#troubleshooting}
 
 - 401: confirm login/key and expiry; a public bundle URL still needs authentication.
 - 403: check project membership/role and selected environment; a read key cannot publish.

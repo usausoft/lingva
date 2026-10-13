@@ -9,7 +9,7 @@ and publication are separate: see [CLI](/installation/cli) and
 [Native Bundles](/installation/native-bundles) for installation and distribution
 boundaries.
 
-## Runtime and SDKs
+## Runtime and SDKs {#runtime-and-sdks}
 
 - [x] Locale lookup, fallback, interpolation, nested keys, and typed variants
 - [x] Local and authenticated hosted bundle loading
@@ -20,7 +20,7 @@ boundaries.
 - [x] Versioned bundle fixtures and Swift, Kotlin, and Flutter source clients
 - [x] Shared translation-key and portable bundle contracts
 
-## Customer CLI
+## Customer CLI {#customer-cli}
 
 - [x] One Rust engine for all customer commands, with npm and Python launchers
 - [x] Local onboarding and generated framework integration
@@ -34,7 +34,7 @@ boundaries.
 - [x] Local studio preview and safe application of exported translations
 - [x] Local-mode GitHub Actions scaffolding
 
-## Public distribution
+## Public distribution {#public-distribution}
 
 - [x] Lingva licenses preserved for public source and packages
 - [x] Protected JavaScript builds without runtime source maps
@@ -43,7 +43,7 @@ boundaries.
 - [x] Runnable local examples without hosted credentials
 - [ ] Publish and stabilize native SDKs in their ecosystem registries
 
-## Future integrations
+## Future integrations {#future-integrations}
 
 - [ ] `i18next` compatibility layer
 - [ ] `react-intl` compatibility layer

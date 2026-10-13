@@ -5,115 +5,60 @@ slug: /
 
 # Introduction to Lingva
 
-**Lingva** is language infrastructure for developers.
+Lingva provides translation runtimes, a customer CLI, and portable translation resources. Start locally without an account, then connect hosted delivery when your application needs it.
 
-We are building a localization platform around a simple idea: translations should be treated with the same care as application code. They should be structured, reviewable, portable, and easy to integrate into modern development workflows.
+<span id="what-is-broken-today" />
+<span id="what-lingva-aims-to-provide" />
+<span id="current-mvp" />
+<span id="collaboration-without-chaos" />
 
-## Philosophy
+## What you can use today {#what-you-can-use-today}
 
-> **Language infrastructure as code**
+- JavaScript translation lookup, locale fallback, interpolation, typed keys, and variants.
+- React, Next.js, Angular, Vue, and Svelte integrations.
+- Node, Electron, and Docusaurus runtime adapters.
+- Python `lingva-sdk` for local and authenticated hosted translation loading.
+- One Rust CLI engine with npm and Python installation adapters.
+- Validation, extraction, import/export, generated types, manifests, and bundles.
+- Hosted pull/push, draft review, publication, and delivery refresh through customer commands.
 
-Translations are not just static files. They are part of the product surface, part of the release process, and part of team collaboration. Lingva exists to make that explicit.
+Swift, Kotlin, and Flutter clients are source previews. Their ecosystem registry releases remain planned. See [Native bundles](/installation/native-bundles).
 
-## What is broken today
+The npm and Python CLI adapters are released as `0.1.5`. Guides describe this checkout; use `lingva --version` to check your installed CLI.
 
-Traditional localization workflows usually rely on spreadsheets, scattered JSON files, manual imports, and too much context switching between developers, translators, and product teams.
+<span id="how-to-use-lingva-today" />
+<span id="developer-experience-first" />
 
-That creates predictable problems:
+## Start with local delivery {#start-with-local-delivery}
 
-- Missing context for translators
-- Painful merges and conflicting files
-- Silent missing keys in production
-- Redeploys for text-only changes
-- No single source of truth across environments
+1. [Install the CLI](/installation/overview).
+2. Run `lingva init --mode local --no-auth --sdk vanilla`, or select the SDK for your framework.
+3. Edit `.lingva/translations/{locale}.json` and run `lingva sync`.
+4. Use the generated integration in your application.
+5. Run `lingva check` in CI to catch validation errors and generated-file drift.
 
-## What Lingva aims to provide
+Local delivery uses repository resources and needs no hosted credentials. [Configuration](/installation/configuration) explains how local and remote sources differ.
 
-Lingva treats translations as a first-class part of your stack:
+<span id="philosophy" />
+<span id="principles" />
+<span id="zero-lock-in" />
 
-- **Developer-first runtime** with framework-friendly APIs
-- **Type-friendly workflows** for keys and variables
-- **Collaboration-ready foundation** for reviews and iteration
-- **Self-hostable architecture** with open export paths
-- **Performance-minded delivery** with fallback-friendly runtime behavior
+## Portable resources {#portable-resources}
 
-## Current MVP
+Translation JSON and generated bundles remain part of your application's delivery workflow. You can import existing resources, export translations, and choose local or hosted loading.
 
-The current repository is focused on the first layer of that vision.
+Public SDKs and customer tooling are available under their applicable Lingva licenses. Hosted services are a separate product. An operator-supported self-hosted bootstrap is still planned.
 
-The repository integration surface includes `@lingva/js`, `@lingva/react`, `@lingva/next`, `@lingva/angular`, `@lingva/vue`, `@lingva/svelte`, `@lingva/node`, `@lingva/docusaurus`, `@lingva/electron`, and Python `lingva-sdk`. Source-level Swift, Kotlin, and Flutter clients are previews, not registry releases. React Native, Unity, and Unreal remain planned. This checkout targets unreleased CLI 0.1.4 and runtime-only Python SDK 0.1.5; check the installed version rather than assuming registry packages match source.
+<span id="product-direction" />
+<span id="near-term" />
+<span id="longer-term" />
+<span id="ai-as-an-assistant" />
+<span id="next-steps" />
 
-Current implemented capabilities include:
+## Find the right guide {#find-the-right-guide}
 
-- locale-aware translation lookup
-- fallback locale resolution
-- variable interpolation
-- typed project definitions and metadata
-- validation and CI reporting
-- manifest generation
-- TypeScript artifact generation
-- generated helper modules
-- source key extraction with audit-style reporting, including TypeScript parser support
-- translator and reviewer workflow metadata with CLI reporting
-- import and export workflows for normalized resource payloads
-- backend-agnostic remote loading contract
-
-This gives us a real runtime and tooling foundation while the broader product surface continues to grow.
-
-## How to use Lingva today
-
-The intended workflow is:
-
-1. Install the CLI, then scaffold account-free local mode with `lingva init --mode local --no-auth --sdk vanilla` (choose a framework SDK for its provider)
-2. Let Lingva manage `.lingva/translations/{locale}.json` and generated project artifacts
-3. Wrap your app with the React or Next provider when applicable
-4. Use translated strings in UI components and pages
-5. Expand to hosted sync, review, and delivery automation as your product scales
-
-If you want to start hands-on, go to **[Installation](/installation/overview)**.
-
-## Product direction
-
-### Near term
-
-- Solidify framework adapters and integration ergonomics
-- Expand extraction and codegen workflows
-- Improve type safety for keys and translation variables
-- Turn the web app into a hands-on MVP experience
-
-### Longer term
-
-- Harden hosted delivery and provide an operator-supported self-hosted bootstrap
-- Extend existing import/export tooling beyond normalized JSON
-- Expand implemented memberships, draft review, promotion, and activity workflows
-- AI-assisted translation support
-- More framework and platform integrations
-
-## Principles
-
-### Developer experience first
-
-The tool should feel natural in day-to-day code, not like a separate system bolted on afterward.
-
-### Zero lock-in
-
-Your translations should remain yours. Open formats and self-hosting are part of the design, not an afterthought.
-
-### Collaboration without chaos
-
-Localization is a team workflow. It needs structure, history, and context.
-
-### AI as an assistant
-
-AI can help with suggestions and quality checks, but product teams stay in control.
-
-## Next steps
-
-- **[Installation](/installation/overview)** to start with the current runtime
-- **[Docs Overview](/overview)** for user-facing guides
-- **[Roadmap](/roadmap)** for the longer product direction
-- **[Progress Checklist](/progress)** to see what is done and what is next
-
----
-
-Ready to build multilingual software with better defaults? Continue with **[Installation](/installation/overview)**.
+- [Documentation overview](/overview): choose a task and integration.
+- [CLI reference](/installation/cli): customer commands and automation.
+- [Customer workspace](/workspace): hosted projects, review, and delivery workflows.
+- [Progress checklist](/progress): implemented public capabilities.
+- [Roadmap](/roadmap): planned work and distribution boundaries.

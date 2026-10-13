@@ -12,21 +12,21 @@ runtime surface and adds a Next-facing config helper. The recommended App Router
 path is to use a Client Component provider at the app boundary and keep private
 delivery credentials outside the browser bundle.
 
-## 1. Install packages
+## 1. Install packages {#1-install-packages}
 
 <Tabs groupId="package-manager">
   <TabItem value="pnpm" label="pnpm" default>
 
 ```bash
-pnpm add @lingva/react @lingva/next
-pnpm add --save-dev --allow-build @lingva/cli @lingva/cli
+pnpm add @lingva/react @lingva/next @lingva/core
+pnpm add --save-dev --allow-build=@lingva/cli @lingva/cli
 ```
 
   </TabItem>
   <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn add @lingva/react @lingva/next
+yarn add @lingva/react @lingva/next @lingva/core
 yarn add --dev @lingva/cli
 ```
 
@@ -34,14 +34,14 @@ yarn add --dev @lingva/cli
   <TabItem value="npm" label="npm">
 
 ```bash
-npm install @lingva/react @lingva/next
+npm install @lingva/react @lingva/next @lingva/core
 npm install --save-dev @lingva/cli
 ```
 
   </TabItem>
 </Tabs>
 
-## 2. Scaffold local mode
+## 2. Scaffold local mode {#2-scaffold-local-mode}
 
 ```bash
 pnpm lingva init --mode local --no-auth --sdk next
@@ -56,13 +56,14 @@ This creates:
 - `src/lingva/provider.tsx`
 
 The generated provider passes a per-provider config and project, so app code
-does not need to import every translation file. Keep shared SSR processes free
-of request-specific global configuration.
+does not need to import every translation file. Its helper also registers a global
+React default unless `register: false` is supplied. Keep shared SSR processes free
+of request-specific global configuration; the manual example below disables registration.
 
 If you want to inspect a working App Router project first, use the
 **[Next.js Starter](/installation/next-starter)** in `examples/next-starter`.
 
-## 3. Configure Next.js
+## 3. Configure Next.js {#3-configure-nextjs}
 
 ```js
 // next.config.js
@@ -74,16 +75,16 @@ const nextConfig = {
 module.exports = nextConfig;
 ```
 
-## 4. Mount the provider
+## 4. Mount the provider {#4-mount-the-provider}
 
-The generated provider uses `configureLingvaNextClient` or the equivalent React
-bootstrap pattern under the hood. A compact manual provider looks like this:
+The generated provider uses `createLingvaNextProvider`, which prepares config
+through `configureLingvaNextClient`. A compact manual provider disables its
+optional global registration:
 
 ```tsx
 // src/lingva/provider.tsx
 'use client';
 
-import type { ReactNode } from 'react';
 import { createLingvaNextProvider } from '@lingva/next';
 import lingvaConfig from '../../.lingva/generated/runtime';
 import lingvaProject from '../../.lingva/generated/project';
@@ -92,6 +93,7 @@ export const AppLingvaProvider = createLingvaNextProvider({
   config: lingvaConfig,
   project: lingvaProject,
   displayName: 'AppLingvaProvider',
+  register: false,
 });
 ```
 
@@ -113,7 +115,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 }
 ```
 
-## 5. Use translations in Client Components
+## 5. Use translations in Client Components {#5-use-translations-in-client-components}
 
 ```tsx
 'use client';
@@ -136,7 +138,7 @@ export function Hero() {
 }
 ```
 
-## 6. Keep translations healthy
+## 6. Keep translations healthy {#6-keep-translations-healthy}
 
 Run these commands locally and in CI:
 
@@ -149,7 +151,7 @@ pnpm lingva check
 those JSON files. It does not regenerate TypeScript modules. `check`
 fails when non-default locales drift from the default key contract.
 
-## Remote Mode
+## Remote Mode {#remote-mode}
 
 Remote delivery should not expose private API keys through `NEXT_PUBLIC_*`
 environment variables. Use one of these patterns:
@@ -177,7 +179,7 @@ translations and merges them with local locale files. Same-key conflicts fail
 before writes. Verify protected delivery with a `delivery:read` SDK key; never
 expose a publishing credential to Client Components.
 
-## Current Scope
+## Current Scope {#current-scope}
 
 `@lingva/next` currently exports `defineLingvaNextConfig`,
 `configureLingvaNextClient`, `createLingvaNextProvider`, React provider/hooks,

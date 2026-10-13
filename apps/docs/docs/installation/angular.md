@@ -8,18 +8,18 @@ sidebar_position: 6
 injection and signals. It supports local generated resources and remote bundle
 delivery through the same configuration contract.
 
-## Install
+## Install {#install}
 
 ```bash
-pnpm add @lingva/angular
-pnpm add -D --allow-build @lingva/cli @lingva/cli
+pnpm add @lingva/angular @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
 pnpm lingva init --mode local --no-auth --sdk angular
 ```
 
 The command generates `src/lingva/providers.ts`. Pass its
 `provideAppLingva()` result to `bootstrapApplication`.
 
-## Register the adapter
+## Register the adapter {#register-the-adapter}
 
 Register one adapter at the application boundary. Import the `resources` type
 from the generated project to preserve key and interpolation autocomplete.
@@ -37,7 +37,7 @@ bootstrapApplication(AppComponent, {
 });
 ```
 
-## Translate in a component
+## Translate in a component {#translate-in-a-component}
 
 ```ts
 import { Component } from '@angular/core';
@@ -59,16 +59,20 @@ export class WelcomeComponent {
   readonly lingva = injectLingva<typeof resources>();
 
   setRussian() {
-    void this.lingva.setLocale('ru');
+    void this.lingva.setLocale('ru').catch(() => undefined);
   }
 }
 ```
 
 The adapter exposes read-only `locale`, `loading`, and `error` signals. Locale
 loads cancel stale remote requests, so a rapid switch cannot overwrite the most
-recent selection.
+recent selection. `setLocale` returns a promise that rejects on delivery failure;
+this example leaves the failure available through `lingva.error()`. Render that
+error signal as well as loading state. The browser adapter's `ready` promise
+settles after initial loading and records failures in `error`; it does not reject.
+Call `lingva.runtime.destroy()` when its owning application is destroyed.
 
-## Server rendering
+## Server rendering {#server-rendering}
 
 `createLingvaAngularServer` creates a request-scoped adapter and waits for the
 initial remote bundle. Destroy its runtime after the render completes. Do not

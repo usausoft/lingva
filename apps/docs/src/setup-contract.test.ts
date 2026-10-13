@@ -164,7 +164,7 @@ test('complete customer reference covers native commands and separated adapters'
   assert.deepEqual(Object.keys(npm.bin), ['lingva']);
   assert.doesNotMatch(sdkManifest, /\[project\.scripts\]/u);
   assert.match(pythonManifest, /lingva = "lingva_cli\._launcher:main"/u);
-  assert.match(reference, /CLI `0\.1\.4`/u);
+  assert.match(reference, /CLI `0\.1\.5`/u);
   assert.match(reference, /private undo journal/u);
   assert.match(reference, /recovers an interrupted batch/u);
   assert.match(reference, /publish --dry-run/u);

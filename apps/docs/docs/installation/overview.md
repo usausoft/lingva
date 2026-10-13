@@ -5,7 +5,7 @@ sidebar_position: 1
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Overview
+# Installation overview
 
 Lingva works best when we keep setup simple:
 
@@ -19,7 +19,7 @@ If you are not sure which setup you need, start with
 local SDK, React/Next provider, local authoring, hosted remote delivery, and
 offline emulator paths.
 
-## Get Started
+## Get Started {#get-started}
 
 Install the standalone CLI once. It contains its own runtime; Node.js and
 Python are not required. On macOS/Linux, use the public Homebrew tap:
@@ -29,7 +29,7 @@ brew install usausoft/tap/lingva
 lingva --version
 ```
 
-Verify CLI version **0.1.4** or newer for the complete customer command surface.
+Verify CLI version **0.1.5** or newer for the complete customer command surface.
 Homebrew does not install the JavaScript runtime/config bridge. See the
 [CLI reference](./cli.md) for differences and upgrade commands.
 
@@ -193,7 +193,7 @@ const lingva = createLingvaJsRuntime({
 console.log(lingva.tSync('common.welcome'));
 ```
 
-## Current Package Model
+## Current Package Model {#current-package-model}
 
 | Package              | Description                                                           | When to use                                           |
 | -------------------- | --------------------------------------------------------------------- | ----------------------------------------------------- |
@@ -206,10 +206,10 @@ console.log(lingva.tSync('common.welcome'));
 | `@lingva/svelte`     | Typed stores and request-scoped server helpers                        | Svelte 5 and SvelteKit apps                           |
 | `@lingva/docusaurus` | Thin adapter over the JS runtime                                      | Docusaurus sites and docs portals                     |
 | `@lingva/electron`   | Thin adapter over the JS runtime                                      | Electron preload and renderer surfaces                |
-| `lingva-sdk`         | Python translation runtime (runtime-only from the next 0.1.5 release) | Python backends, workers, and applications            |
-| `lingva-cli`         | Separate installer for the Rust customer CLI (next 0.1.4 release)     | Python developer tooling and CI                       |
+| `lingva-sdk`         | Python translation runtime (runtime-only since 0.1.5)                 | Python backends, workers, and applications            |
+| `lingva-cli`         | Separate installer for the Rust customer CLI (0.1.5)                  | Python developer tooling and CI                       |
 
-## Recommended Flow
+## Recommended Flow {#recommended-flow}
 
 1. Run `lingva init`
 2. Pick `local` or `remote` delivery
@@ -221,12 +221,12 @@ console.log(lingva.tSync('common.welcome'));
 
 For a production application, each path should end with a reproducible check:
 
-- local mode from the config root: `pnpm lingva check`
+- local mode from the config root: `lingva check`
 - React/Next mode: Lingva check plus the app `typecheck` and `build`
 - hosted mode: `lingva push --invalidate` plus current-bundle consumption from
   the deployed app environment
 
-## Verification
+## Verification {#verification}
 
 ```ts
 import { createLingvaJsRuntime } from '@lingva/js';
@@ -245,7 +245,7 @@ const value = await lingva.t('test.key', {
 console.log(value);
 ```
 
-## Next Steps
+## Next Steps {#next-steps}
 
 - [Integration Paths](/installation/integration-paths)
 - [JavaScript](/installation/js)

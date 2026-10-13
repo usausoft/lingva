@@ -8,13 +8,13 @@ These adapters reuse `@lingva/js`; they are not separate translation engines.
 Check your installed package version. This guide describes the current source
 surface, not proof that every registry version includes it.
 
-## Node.js
+## Node.js {#nodejs}
 
 Install the runtime and CLI, then scaffold local JavaScript resources:
 
 ```bash
-pnpm add @lingva/node
-pnpm add -D --allow-build @lingva/cli @lingva/cli
+pnpm add @lingva/node @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
 pnpm lingva init --mode local --no-auth --sdk vanilla
 ```
 
@@ -45,14 +45,15 @@ frameworks need a wrapper. Supply `detectLocale` to use a validated session
 locale. See the [Node package reference](https://github.com/usausoft/lingva/blob/dev/packages/node/README.md)
 for a full middleware example.
 
-`createLingvaNodeFileLoader` reads local JSON delivery paths. Use the generated
+`createLingvaNodeFileLoader` returns a filesystem reader for local JSON delivery
+paths. `createLingvaNodeRuntime` installs it automatically. Use the generated
 project for build-time resources, or await a local delivery load before `tSync`.
 The filesystem loader is Node-only; do not include it in browser bundles.
 
-## Electron
+## Electron {#electron}
 
 ```bash
-pnpm add @lingva/electron
+pnpm add @lingva/electron @lingva/core
 ```
 
 ```ts
@@ -70,10 +71,10 @@ access local files automatically, or persist bundles. Keep privileged credential
 in the main process or an authenticated backend; expose only read-scoped delivery
 values to renderer code. For hosted resources, await `loadLocale` before `tSync`.
 
-## Docusaurus
+## Docusaurus {#docusaurus}
 
 ```bash
-pnpm add @lingva/docusaurus
+pnpm add @lingva/docusaurus @lingva/core
 ```
 
 ```ts
@@ -91,7 +92,7 @@ Markdown, routes, sidebars, locale URL prefixes, or filesystem loading. Configur
 Docusaurus i18n separately. Static site builds should use repository resources;
 never serialize publishing credentials into generated pages.
 
-## Shared lifecycle and delivery
+## Shared lifecycle and delivery {#shared-lifecycle-and-delivery}
 
 - Synchronous lookup needs embedded or previously loaded resources.
 - Hosted loading needs a copied project/environment bundle URL and read-scoped key.

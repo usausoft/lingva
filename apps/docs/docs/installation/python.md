@@ -14,11 +14,11 @@ The two packages have separate responsibilities:
 - `lingva-cli`: a thin launcher for the standalone Rust `lingva` command
 - `lingva-sdk`: `LingvaClient` for reading validated locale bundles in Python code
 
-Runtime-only SDK 0.1.5 and CLI 0.1.4 have independent installation and release
+Runtime-only SDK 0.1.5 and CLI 0.1.5 have independent installation and release
 lifecycles. Earlier SDK versions bundled a CLI launcher; upgrade those first
 before installing the independent CLI.
 
-## Install
+## Install {#install}
 
 Install the runtime and the optional async HTTP client:
 
@@ -33,7 +33,7 @@ release:
 
 ```text
 lingva-sdk[http]==0.1.5
-lingva-cli==0.1.4
+lingva-cli==0.1.5
 ```
 
 If upgrading an older SDK installation that owns the `lingva` console script, upgrade the SDK
@@ -41,7 +41,7 @@ first and reinstall the CLI last:
 
 ```bash
 python -m pip install --upgrade "lingva-sdk[http]==0.1.5"
-python -m pip install --force-reinstall "lingva-cli==0.1.4"
+python -m pip install --force-reinstall "lingva-cli==0.1.5"
 ```
 
 This order prevents the older SDK's uninstall step from removing the new CLI's
@@ -60,7 +60,7 @@ trust boundary.
 See the [complete CLI reference](./cli.md) for all 23 customer commands,
 supported options, artifact generation, source extraction, and edge cases.
 
-## Create the portable project config
+## Create the portable project config {#create-the-portable-project-config}
 
 Run the CLI from the root of the consumer repository. Hosted remote mode is the
 default and requires one browser login:
@@ -110,7 +110,7 @@ fallbackLocale: en
 translationFiles: .lingva/translations/{locale}.json
 ```
 
-## Authenticate hosted commands
+## Authenticate hosted commands {#authenticate-hosted-commands}
 
 Local `sync` and `check` need no account. For hosted `pull` and `push`, copy the
 project API key or browser-login values from **Consumer application setup** in
@@ -163,7 +163,7 @@ from the repository root.
 The config argument is optional for `sync`, `check`, `pull`, and `push`. Each
 command looks for `lingva.config.yaml` in the current project root by default.
 
-## Keep repository translations aligned
+## Keep repository translations aligned {#keep-repository-translations-aligned}
 
 Use `sync` after adding keys to the default locale. Existing translations are
 never overwritten:
@@ -216,7 +216,7 @@ key contract: ASCII letters, digits, dots, underscores, and hyphens; a letter
 or digit first; no trailing or consecutive dots. Nested keys flatten to this
 same contract, and colliding dotted/nested paths are invalid.
 
-## Connect a hosted project
+## Connect a hosted project {#connect-a-hosted-project}
 
 Open the Lingva project and expand **Consumer application setup**:
 
@@ -253,7 +253,7 @@ Use a read-scoped key for application delivery and a separately scoped write
 key for CI publishing. Keys belong in the customer backend or CI secret store,
 not in browser or mobile bundles.
 
-## Load hosted translations in Python
+## Load hosted translations in Python {#load-hosted-translations-in-python}
 
 ```python
 import asyncio
@@ -285,7 +285,7 @@ For synchronous services, use `LingvaClient.from_url_sync(...)`. Both loaders
 validate the bundle before exposing it and keep key lookup and interpolation
 behavior aligned with the other Lingva runtimes.
 
-## GitHub Actions pull hook
+## GitHub Actions pull hook {#github-actions-pull-hook}
 
 The CLI is non-interactive and can update repository translations after a
 manual or external dispatch:
@@ -315,7 +315,7 @@ jobs:
 Add the repository's normal branch or pull-request automation after `lingva
 pull`. Lingva intentionally does not choose a customer's merge policy.
 
-## Verify the setup
+## Verify the setup {#verify-the-setup}
 
 ```bash
 lingva check

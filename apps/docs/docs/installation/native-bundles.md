@@ -15,7 +15,7 @@ Python is distributed separately through PyPI. Use the dedicated
 **[Python guide](./python.md)** for `lingva-sdk`, portable CLI sync, and hosted
 delivery.
 
-## Bundle contract
+## Bundle contract {#bundle-contract}
 
 `lingva publish` writes a manifest plus one bundle for every selected locale.
 A locale bundle contains the resolved flat messages together with provenance,
@@ -66,7 +66,7 @@ they do not understand instead of accepting a potentially incompatible bundle.
 Generate local artifacts with:
 
 ```bash
-pnpm add --save-dev --allow-build @lingva/cli @lingva/cli
+pnpm add --save-dev --allow-build=@lingva/cli @lingva/cli
 ```
 
 For local artifacts, export an endpoint-free project first:
@@ -88,7 +88,7 @@ The export omits endpoints and credentials. Do not add `--api-url` or a hosted
 `--config` override when generating local artifacts. Ordinary `publish` against
 a config with an endpoint uploads; its output directory is not a dry-run flag.
 
-## Preview packages
+## Preview packages {#preview-packages}
 
 The source packages live in the repository under:
 
@@ -100,7 +100,7 @@ Each preview exposes a bundle model, a translator, and a store/controller that
 only swaps its current state after a new payload has decoded and validated.
 The shared fixture in `sdks/fixtures` is used to keep their behavior aligned.
 
-### Swift
+### Swift {#swift}
 
 Add `sdks/swift` as a local Swift package and use the `Lingva` product:
 
@@ -117,11 +117,12 @@ let boldTitle = bundle.translate(
 )
 ```
 
-`refresh(from:)` sends no Lingva credentials. Use it with packaged/test
-artifacts or a customer-controlled authenticated proxy, not with a raw hosted
-delivery URL that requires a project key.
+`refresh(from:)` sends no Lingva credentials by default and expects a successful
+HTTP response. Use a customer-controlled authenticated proxy for remote loading;
+load packaged bundle data with `load(data:)`. A raw hosted delivery URL that
+requires a project key will not work without an authenticated request setup.
 
-### Kotlin
+### Kotlin {#kotlin}
 
 Include `sdks/kotlin` as a local Gradle build while the package is in preview:
 
@@ -140,7 +141,7 @@ preview deliberately does not choose an application coroutine scope.
 `refresh` does not attach a Lingva key; route live requests through a trusted
 backend or ship a validated bundle with the application.
 
-### Flutter
+### Flutter {#flutter}
 
 Reference `sdks/flutter` with a path dependency, then own the controller near
 the application locale state:
@@ -160,7 +161,7 @@ notification and a failed load leaves the previous bundle intact.
 The preview does not attach Lingva credentials, so hosted refresh requires a
 customer-controlled authenticated proxy.
 
-## Reader responsibilities
+## Reader responsibilities {#reader-responsibilities}
 
 A minimal reader should:
 

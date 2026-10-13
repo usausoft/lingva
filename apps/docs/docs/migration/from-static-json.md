@@ -15,33 +15,33 @@ equivalent root YAML and TS files.
 
 This guide covers moving an existing project that manages translations as raw
 JSON files to Lingva's typed, versioned workflow. The migration has two phases:
-**local** (translation files stay in your repo, zero behavioral change) and
+**local** (translation files stay in your repo; verify runtime compatibility) and
 **hosted** (bundles are published and delivered at runtime, no redeployment
 required for translation updates). You can stop after phase 1 — the local
 mode is a complete solution.
 
 ---
 
-## What changes (and what stays the same)
+## What changes (and what stays the same) {#what-changes-and-what-stays-the-same}
 
-|                       | Static JSON workflow     | Lingva local mode                          | Lingva hosted mode                      |
-| --------------------- | ------------------------ | ------------------------------------------ | --------------------------------------- |
-| Translation files     | `public/locales/en.json` | `.lingva/translations/en.json`             | same + pushed to Lingva                 |
-| Key lookup            | string literal, untyped  | TypeScript-typed, autocomplete             | same                                    |
-| Missing key detection | runtime (or never)       | build-time compile error                   | same                                    |
-| Locale switching      | manual state + re-render | `setLocale()` or provider                  | same                                    |
-| Delivery update       | redeploy                 | redeploy                                   | `lingva push --invalidate`, no redeploy |
-| CI check              | none (or custom)         | `lingva check` + `lingva metadata --check` | same                                    |
+|                       | Static JSON workflow     | Lingva local mode                                                | Lingva hosted mode                      |
+| --------------------- | ------------------------ | ---------------------------------------------------------------- | --------------------------------------- |
+| Translation files     | `public/locales/en.json` | `.lingva/translations/en.json`                                   | same + pushed to Lingva                 |
+| Key lookup            | string literal, untyped  | TypeScript-typed, autocomplete                                   | same                                    |
+| Missing key detection | runtime (or never)       | compile-time for typed key APIs; `lingva check` for locale drift | same                                    |
+| Locale switching      | manual state + re-render | `setLocale()` or provider                                        | same                                    |
+| Delivery update       | redeploy                 | redeploy                                                         | `lingva push --invalidate`, no redeploy |
+| CI check              | none (or custom)         | `lingva check` + `lingva metadata --check`                       | same                                    |
 
 ---
 
-## Phase 1: Local migration
+## Phase 1: Local migration {#phase-1-local-migration}
 
 Translation files stay in your repository. Review namespace separators,
 interpolation syntax, fallback behavior, and plural/rich-text handling before
 replacing your lookup function. Lingva does not emulate every i18next/ICU feature.
 
-### Step 1. Install Lingva
+### Step 1. Install Lingva {#step-1-install-lingva}
 
 <Tabs groupId="package-manager">
   <TabItem value="pnpm" label="pnpm" default>
@@ -53,7 +53,7 @@ pnpm add @lingva/react        # React apps
 # or
 pnpm add @lingva/next         # Next.js apps
 
-pnpm add -D --allow-build @lingva/cli @lingva/cli
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
 ```
 
   </TabItem>
@@ -75,7 +75,7 @@ npm install --save-dev @lingva/cli
   </TabItem>
 </Tabs>
 
-### Step 2. Scaffold Lingva
+### Step 2. Scaffold Lingva {#step-2-scaffold-lingva}
 
 ```bash
 pnpm lingva init --mode local --no-auth --sdk vanilla --locale en,fr --default-locale en
@@ -90,7 +90,7 @@ lingva.config.yaml            ← portable CLI config
 .lingva/generated/project.ts  ← module importing locale JSON
 ```
 
-### Step 3. Move your existing JSON files
+### Step 3. Move your existing JSON files {#step-3-move-your-existing-json-files}
 
 Copy your existing translation files into `.lingva/translations/`. Lingva
 expects one file per locale named `{locale}.json`:
@@ -118,7 +118,7 @@ Lingva uses nested JSON keys by default:
 Flat keys also work. Keep whatever structure your existing files use — Lingva
 only requires that the structure is consistent across locales.
 
-### Step 4. Check `lingva.config.yaml`
+### Step 4. Check `lingva.config.yaml` {#step-4-check-lingvaconfigyaml}
 
 Tell Lingva about your locales:
 
@@ -136,7 +136,7 @@ The scaffold's generated project imports the locale files selected during init.
 If you later add locales, update both YAML and generated runtime/project imports.
 Do not rerun `init --force` without reviewing the replacement files.
 
-### Step 5. Check and generate types
+### Step 5. Check and generate types {#step-5-check-and-generate-types}
 
 ```bash
 pnpm lingva check
@@ -149,7 +149,7 @@ pnpm lingva types --output src/generated/lingva-types.ts
 The scaffold's project imports JSON, so ordinary translation edits need no
 regeneration. Review validation output before removing the old runtime.
 
-### Step 6. Replace runtime usage
+### Step 6. Replace runtime usage {#step-6-replace-runtime-usage}
 
 <Tabs groupId="framework">
   <TabItem value="js" label="Plain JS / framework-agnostic" default>
@@ -203,7 +203,7 @@ export function App() {
 }
 ```
 
-Choose `--sdk react` in step2 to generate the provider wrapper. For an existing
+Choose `--sdk react` in step 2 to generate the provider wrapper. For an existing
 project, add the provider manually rather than replacing files with another init:
 
 ```bash
@@ -250,7 +250,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   </TabItem>
 </Tabs>
 
-### Step 7. Add a CI check (optional but recommended)
+### Step 7. Add a CI check (optional but recommended) {#step-7-add-a-ci-check-optional-but-recommended}
 
 ```bash
 pnpm lingva init --mode local --no-auth --sdk vanilla --locale en,fr --ci github
@@ -262,7 +262,7 @@ The workflow installs the standalone binary and runs non-mutating `lingva check`
 Metadata is also Rust-owned: add `lingva metadata --check` when scaffolding drift
 must fail CI.
 
-### Step 8. Remove the old library
+### Step 8. Remove the old library {#step-8-remove-the-old-library}
 
 Once your app builds and tests pass with the Lingva runtime, remove the
 previous i18n library:
@@ -273,7 +273,7 @@ pnpm remove react-i18next i18next    # or next-i18next, next-intl, etc.
 
 ---
 
-## Concept mapping
+## Concept mapping {#concept-mapping}
 
 | Old concept                             | Lingva equivalent                                                                                              |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -289,12 +289,12 @@ pnpm remove react-i18next i18next    # or next-i18next, next-intl, etc.
 
 ---
 
-## Phase 2: Hosted delivery (optional)
+## Phase 2: Hosted delivery (optional) {#phase-2-hosted-delivery-optional}
 
 After phase 1 is stable, you can switch to hosted delivery. This lets you push
 translation updates without redeploying your app.
 
-### 1. Create a Lingva account and project
+### 1. Create a Lingva account and project {#1-create-a-lingva-account-and-project}
 
 Open `/app/projects/<project-id>` and find **Consumer application setup**. Copy
 the browser-login command shown there. The CLI discovers the environment's
@@ -308,7 +308,7 @@ pnpm lingva auth login
 The SDK key created by the customer UI is read-only runtime configuration. It
 cannot replace human login for publishing.
 
-### 2. Push translations to Lingva
+### 2. Push translations to Lingva {#2-push-translations-to-lingva}
 
 ```bash
 pnpm lingva push \
@@ -316,7 +316,7 @@ pnpm lingva push \
   --invalidate
 ```
 
-### 3. Switch delivery mode
+### 3. Switch delivery mode {#3-switch-delivery-mode}
 
 Update the generated runtime adapter's delivery configuration. Preserve its
 existing project identity/locale fields, and set the same environment as CLI push:
@@ -349,7 +349,7 @@ on `/app/projects/<project-id>`. Use the bundler's public environment convention
 write/admin credentials. YAML's `apiUrl` selects CLI transfer; runtime delivery
 configuration selects browser loading. Keep both on the same environment.
 
-### 4. Publish and invalidate
+### 4. Publish and invalidate {#4-publish-and-invalidate}
 
 ```bash
 pnpm lingva push \
@@ -357,11 +357,14 @@ pnpm lingva push \
   --invalidate
 ```
 
-Translation changes are live without redeploying the app.
+Published translation changes require no app redeployment. Existing clients
+see them when their configured delivery cache reloads or the application
+explicitly refreshes the client; `push --invalidate` does not update an
+already-loaded in-memory client by itself.
 
 ---
 
-## Rollback
+## Rollback {#rollback}
 
 If you need to revert to the old library at any point before phase 2:
 
@@ -373,7 +376,7 @@ There is no server-side state to undo in local mode.
 
 ---
 
-## Next steps
+## Next steps {#next-steps}
 
 - [Configuration reference](/installation/configuration)
 - [Integration paths](/installation/integration-paths)
