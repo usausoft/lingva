@@ -8,7 +8,7 @@ Use one Lingva project as the translation contract while letting every
 microfrontend own its runtime. This keeps framework state isolated and avoids
 coupling independently deployed applications.
 
-## Recommended layout
+## Recommended layout {#recommended-layout}
 
 ```text
 packages/i18n/
@@ -53,15 +53,18 @@ without duplicating locale-loading or cancellation logic.
 Do not share a mutable runtime singleton across isolated deployments. Share the
 translation contract and propagate the selected locale explicitly instead.
 
-## Locale propagation
+## Locale propagation {#locale-propagation}
 
 For same-page microfrontends, use an application-owned event whose payload is a
 validated Lingva locale. For iframe isolation, pass the locale in the iframe URL
 or a typed `postMessage` contract. The child remains responsible for calling
-its own adapter's `setLocale` method. For vanilla hosted JS, first await
-`runtime.loadLocale(locale)` and then call `runtime.setLocale(locale)`; vanilla
-locale selection alone does not fetch. Framework adapters handle hydration
-inside their asynchronous locale-switch methods.
+its own adapter's locale-switch method. For vanilla hosted JS, await
+`runtime.loadLocale(locale)`: it both selects and loads the locale. Calling
+`runtime.setLocale(locale)` afterward creates a new client and discards the loaded
+client state. Angular, Vue, and Svelte expose asynchronous `setLocale` methods;
+React switches state synchronously and hydrates remote delivery in a provider
+effect. Render each adapter's loading and error state. When using `postMessage`,
+validate the sender origin and payload, and send to an explicit target origin.
 
 ```ts
 const childUrl = new URL('/account/', window.location.origin);
@@ -76,7 +79,7 @@ Treat locale propagation like any other public integration contract:
 - deploy compatible translation keys before code that requires them
 - show local loading feedback while a remote locale bundle is fetched
 
-## CI verification
+## CI verification {#ci-verification}
 
 Run `lingva sync --check` and `lingva check` once against the shared translation
 package, then build every consumer. A complete example should also exercise

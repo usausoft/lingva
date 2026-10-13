@@ -7,17 +7,17 @@ sidebar_position: 8
 `@lingva/vue` provides a Vue plugin and Composition API helper backed by the
 typed Lingva runtime.
 
-## Install
+## Install {#install}
 
 ```bash
-pnpm add @lingva/vue
-pnpm add -D --allow-build @lingva/cli @lingva/cli
+pnpm add @lingva/vue @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
 pnpm lingva init --mode local --no-auth --sdk vue
 ```
 
 The command generates `src/lingva/index.ts` with an `appLingva` plugin.
 
-## Install the plugin
+## Install the plugin {#install-the-plugin}
 
 ```ts
 // src/main.ts
@@ -35,7 +35,7 @@ const lingva = createLingvaVue<typeof resources>({
 createApp(App).use(lingva).mount('#app');
 ```
 
-## Use the composable
+## Use the composable {#use-the-composable}
 
 ```vue
 <script setup lang="ts">
@@ -56,13 +56,17 @@ const { loading, locale, setLocale, t } = useLingva<typeof resources>();
 `locale`, `loading`, and `error` are reactive Vue refs. Use `setLocale`, rather
 than assigning the locale ref directly, to trigger delivery. Translation keys and
 their variables remain typed from the generated project. Remote locale loads
-automatically hydrate bundles and cancel stale requests.
+automatically hydrate bundles and cancel stale requests. `setLocale` returns a
+promise that rejects on delivery failure; handle that rejection and render the
+`error` ref. The browser plugin's `ready` promise settles after initial loading
+and records failures in `error`; it does not reject. Call
+`lingva.runtime.destroy()` when its owning application unmounts.
 
 Create one plugin per Vue application. Microfrontends should share the generated
 translation contract, not a mutable plugin instance; see
 [Microfrontends](./microfrontends.md).
 
-## Nuxt and server rendering
+## Nuxt and server rendering {#nuxt-and-server-rendering}
 
 Use `createLingvaVueServer` for remote delivery during SSR. It waits for the
 initial locale bundle and throws when delivery fails, allowing Nuxt to handle

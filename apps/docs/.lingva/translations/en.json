@@ -11,6 +11,15 @@
     },
     "searchPlaceholder": "Search documentation...",
     "tagline": "Language infrastructure for developers",
-    "title": "Lingva Documentation"
+    "title": "Lingva Documentation",
+    "sections": {
+      "start": "Start here",
+      "integrations": "Frameworks and SDKs",
+      "delivery": "Configuration and delivery",
+      "cli": "CLI and automation",
+      "examples": "Starter projects",
+      "workspace": "Workspace and migration",
+      "product": "Product status"
+    }
   }
 }

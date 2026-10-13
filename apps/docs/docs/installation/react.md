@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 
 # React
 
-## Usage
+## Usage {#usage}
 
 Use `@lingva/react` when you want:
 
@@ -15,25 +15,25 @@ Use `@lingva/react` when you want:
 - typed translation hooks
 - one React-friendly integration layer over Lingva runtime config
 
-## Get Started
+## Get Started {#get-started}
 
 Add `@lingva/react` when you want a provider-based React integration layer over the Lingva runtime.
 
-### 1. Install the package
+### 1. Install the package {#1-install-the-package}
 
 <Tabs groupId="package-manager">
   <TabItem value="pnpm" label="pnpm" default>
 
 ```bash
-pnpm add @lingva/react
-pnpm add --save-dev --allow-build @lingva/cli @lingva/cli
+pnpm add @lingva/react @lingva/core
+pnpm add --save-dev --allow-build=@lingva/cli @lingva/cli
 ```
 
   </TabItem>
   <TabItem value="yarn" label="yarn">
 
 ```bash
-yarn add @lingva/react
+yarn add @lingva/react @lingva/core
 yarn add --dev @lingva/cli
 ```
 
@@ -41,14 +41,14 @@ yarn add --dev @lingva/cli
   <TabItem value="npm" label="npm">
 
 ```bash
-npm install @lingva/react
+npm install @lingva/react @lingva/core
 npm install --save-dev @lingva/cli
 ```
 
   </TabItem>
 </Tabs>
 
-### 2. Wrap your app with `LingvaProvider`
+### 2. Wrap your app with `LingvaProvider` {#2-wrap-your-app-with-lingvaprovider}
 
 If you want Lingva to prepare the first wrapper for you:
 
@@ -58,8 +58,10 @@ pnpm lingva init --mode local --no-auth --sdk react
 
 That creates `src/lingva/provider.tsx` with an `AppLingvaProvider`.
 It creates portable `lingva.config.yaml`, a typed `.lingva/generated/runtime.ts`,
-and, in local mode, `.lingva/generated/project.ts`. The generated provider owns
-its config; it does not require a process-global default.
+and, in local mode, `.lingva/generated/project.ts`. The generated React wrapper
+registers its config through the process-global
+`configureLingvaReact` default. Use it for browser-only, single-project apps.
+For request-specific SSR configuration, pass `config` explicitly as shown below.
 
 You can still pass a shared runtime config plus the hidden generated project explicitly:
 
@@ -130,7 +132,7 @@ Do not expose project-admin, authoring, or delivery-write keys through
 `NEXT_PUBLIC_*` variables. Use `lingva auth login` for interactive CLI writes,
 or keep a separately scoped automation key in a server-only environment.
 
-## Advanced
+## Advanced {#advanced}
 
 ```tsx
 // app/layout.tsx
@@ -147,7 +149,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### 3. Use hooks in components
+### 3. Use hooks in components {#3-use-hooks-in-components}
 
 ```tsx
 'use client';
@@ -172,7 +174,7 @@ export function Welcome({ name }: { name: string }) {
 
 With typed resources, React hooks can autocomplete valid keys and enforce interpolation variables required by each message template.
 
-## Delivery state, text components, and variants
+## Delivery state, text components, and variants {#delivery-state-text-components-and-variants}
 
 `useTranslation` returns synchronous `t`, `locale`, `setLocale`, `loading`, and
 `error`. For hosted delivery, render loading/error states instead of treating
@@ -196,7 +198,7 @@ export function Greeting({ name }: { name: string }) {
 selection is explicit and separate from ICU-style message pluralization. It does
 not parse arbitrary rich text.
 
-## Optional in-context editing
+## Optional in-context editing {#optional-in-context-editing}
 
 ```tsx
 <LingvaProvider
@@ -231,7 +233,7 @@ That means React apps can share one runtime contract for:
 - translation keys and interpolation types
 - consistent locale behavior across components
 
-### React workflow
+### React workflow {#react-workflow}
 
 1. Scaffold `lingva.config.yaml` and `.lingva/generated/runtime.ts` with `lingva init --mode local --no-auth --sdk react`
 2. Keep locales declarative in config and let Lingva manage `.lingva/translations/{locale}.json`

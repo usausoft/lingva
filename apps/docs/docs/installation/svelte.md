@@ -7,17 +7,17 @@ sidebar_position: 7
 `@lingva/svelte` exposes Lingva locale, loading, and error state as Svelte
 stores, with typed translation and locale-switching functions.
 
-## Install
+## Install {#install}
 
 ```bash
-pnpm add @lingva/svelte
-pnpm add -D --allow-build @lingva/cli @lingva/cli
+pnpm add @lingva/svelte @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
 pnpm lingva init --mode local --no-auth --sdk svelte
 ```
 
 The command generates `src/lib/lingva.ts` with an `appLingva` store bundle.
 
-## Create the stores
+## Create the stores {#create-the-stores}
 
 ```ts
 // src/lib/lingva.ts
@@ -31,7 +31,7 @@ export const lingva = createLingvaSvelte<typeof resources>({
 });
 ```
 
-## Use them in a component
+## Use them in a component {#use-them-in-a-component}
 
 ```svelte
 <script lang="ts">
@@ -49,9 +49,13 @@ export const lingva = createLingvaSvelte<typeof resources>({
 Each adapter instance owns its runtime and stores. This is suitable for Svelte
 applications and client-side SvelteKit modules; do not place a user-specific
 mutable instance in a shared server module. Remote loads are cancellable and
-surface failures through the `error` store.
+surface failures through the `error` store. `setLocale` returns a promise that
+rejects on delivery failure; handle the rejection and render the error store.
+The browser adapter's `ready` promise settles after initial loading and records
+failures in `error`; it does not reject. Destroy the runtime when its owning
+application unmounts.
 
-## SvelteKit server rendering
+## SvelteKit server rendering {#sveltekit-server-rendering}
 
 Create a runtime inside the request's `load` function. Do not return stores or
 runtime functions as page data; translate server-owned content and return only

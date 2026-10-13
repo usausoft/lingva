@@ -1,11 +1,13 @@
 import type { Config } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
-import { getDocsSiteText } from './src/site-text';
+import { getDocsSiteText, resolveDocsSiteLocale } from './src/site-text';
 
 const docsSiteUrl = process.env.DOCS_SITE_URL ?? 'https://docs.lingva.dev';
 const docsBaseUrl = process.env.DOCS_BASE_URL ?? '/';
 const dashboardUrl = process.env.DASHBOARD_URL ?? 'https://lingva.dev';
-const docsRuntimeLocale = (process.env.DOCS_RUNTIME_LOCALE ?? 'en') as 'en' | 'ru';
+const docsRuntimeLocale = resolveDocsSiteLocale(
+  process.env.DOCUSAURUS_CURRENT_LOCALE ?? process.env.DOCS_RUNTIME_LOCALE
+);
 const siteText = getDocsSiteText(docsRuntimeLocale);
 
 const config: Config = {
@@ -23,6 +25,7 @@ const config: Config = {
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'ru'],
+    localeConfigs: { en: { label: 'English' }, ru: { label: 'Русский' } },
   },
 
   presets: [
@@ -31,6 +34,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
+          editLocalizedFiles: true,
           editUrl: 'https://github.com/usausoft/lingva/edit/main/apps/docs/',
           routeBasePath: '/',
         },
@@ -45,7 +49,7 @@ const config: Config = {
   markdown: {
     mermaid: true,
     hooks: {
-      onBrokenMarkdownLinks: 'warn',
+      onBrokenMarkdownLinks: 'throw',
     },
   },
 
@@ -76,6 +80,7 @@ const config: Config = {
           label: siteText.dashboardLabel,
           position: 'right',
         },
+        { type: 'localeDropdown', position: 'right' },
       ],
     },
     footer: {

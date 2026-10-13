@@ -9,7 +9,7 @@ works unchanged in JavaScript, Python, and CI. JavaScript framework runtimes may
 also use `lingva.config.ts` when they need typed imports; that runtime adapter
 is separate from the language-neutral CLI contract.
 
-## One CLI interface across languages
+## One CLI interface across languages {#one-cli-interface-across-languages}
 
 The executable is always `lingva`. Direct install, npm, and PyPI all launch the
 same standalone Rust engine:
@@ -69,7 +69,7 @@ Install the CLI before using the commands in this guide:
 curl --proto '=https' --tlsv1.2 -LsSf https://unpkg.com/@lingva/cli@latest/lingva-installer.sh | sh
 ```
 
-The next release separates the Python CLI installer from the application runtime:
+The Python CLI installer is separate from the application runtime:
 
 ```bash
 python -m pip install lingva-cli
@@ -87,7 +87,7 @@ they install a checksummed prebuilt binary and require no language toolchain.
 The Rust CLI implements all 23 customer commands, including extraction,
 code generation, metadata, authoring, and studio. npm and PyPI are checksum-verifying launchers, not
 separate implementations. Framework scaffolding is native Rust behavior.
-These commands require CLI 0.1.4 or newer; verify with `lingva --version`.
+These commands require CLI 0.1.5 or newer; verify with `lingva --version`.
 See the [complete command reference](./cli.md) for examples, policy options,
 error handling, and adapter compatibility. npm alone evaluates executable
 JS/TS configs through its temporary portable-config bridge.
@@ -134,7 +134,7 @@ With `--ci github`, local-mode init creates
 standalone binary and runs `lingva check` for pull requests without requiring
 Node.js or Python.
 
-## Local Mode
+## Local Mode {#local-mode}
 
 Use local mode when translations live in your repository.
 
@@ -205,7 +205,7 @@ Local translation files live in the default repository path:
 
 At runtime, both `common.welcome` and nested resources resolve through the same dot-path contract.
 
-## Translation key contract
+## Translation key contract {#translation-key-contract}
 
 Every Lingva integration uses the same flattened translation-key rules:
 
@@ -271,7 +271,7 @@ variant drift when a locale is missing a default-locale variant, adds an extra
 variant, or changes contract metadata such as `tone`, `mood`, `intonation`,
 `label`, or `context`.
 
-## Local Editing Workflow
+## Local Editing Workflow {#local-editing-workflow}
 
 For now, the intended local-first workflow is:
 
@@ -327,10 +327,9 @@ For CI that should fail only when the translation contract drifts, use:
 pnpm lingva validate ./lingva.config.yaml --fail-on variant-drift
 ```
 
-## Remote Mode
+## Remote Mode {#remote-mode}
 
-Remote `pull` and `push` use optimistic concurrency. Both JavaScript and Python
-CLIs keep the last hosted revision and base dictionaries in the gitignored
+Remote `pull` and `push` use optimistic concurrency. The Rust engine launched by all installation routes keeps the last hosted revision and base dictionaries in the gitignored
 `.lingva/remote-state.json` file. `pull` three-way merges by translation key;
 same-key local and hosted edits fail without overwriting files. `push` fails
 with HTTP `409` when the hosted revision moved. Repeating an identical push
@@ -401,7 +400,7 @@ with the deployed bundle URL and a read-scoped SDK key.
 See [Integration Paths](/installation/integration-paths) for the full
 copy-pasteable path.
 
-## Using the Same Config Everywhere
+## Using the Same Config Everywhere {#using-the-same-config-everywhere}
 
 ```ts
 import { createLingvaJsRuntime } from '@lingva/js';
@@ -494,7 +493,7 @@ Never put private write or management keys in `NEXT_PUBLIC_*` variables. If a
 browser app needs authenticated Lingva access, route it through your server and
 attach the private token there.
 
-## CLI Auth
+## CLI Auth {#cli-auth}
 
 For hosted workflows, use browser-based CLI auth instead of pasting tokens into
 every command. Lingva customers should copy this complete command from
@@ -586,7 +585,7 @@ lingva auth login \
 The CLI prints the verification URL and user code, then waits until the browser
 approval completes.
 
-## Delivery Artifacts
+## Delivery Artifacts {#delivery-artifacts}
 
 When you need artifacts for CI, inspection, or hosted delivery:
 
@@ -641,7 +640,7 @@ The normalized export embeds resources and omits endpoints, credentials, and pol
 Do not add endpoint flags or a hosted `--config` override to the second command.
 This writes artifacts locally without publishing to a hosted endpoint.
 
-## What Comes Next
+## What Comes Next {#what-comes-next}
 
 The current local-first workflow is already usable for application development,
 but some capabilities remain previews:

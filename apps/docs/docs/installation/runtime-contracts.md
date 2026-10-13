@@ -11,7 +11,7 @@ directly for explicit project composition, validation, or build-time artifacts.
 pnpm add @lingva/core
 ```
 
-## Resources, lookup, fallback, and variables
+## Resources, lookup, fallback, and variables {#resources-lookup-fallback-and-variables}
 
 ```ts
 import { createLingvaResources, defineLingvaProject } from '@lingva/core';
@@ -64,7 +64,7 @@ content. Use explicit `defaultValue` for application-owned missing-key fallback.
 Types improve autocomplete for known literal resources, but dynamically loaded
 resources and dynamic keys still need runtime validation.
 
-## Metadata, validation, and workflow
+## Metadata, validation, and workflow {#metadata-validation-and-workflow}
 
 `defineLingvaProject` accepts `keyMetadata`, keyed by flattened translation key.
 Metadata can include description, namespace, tags, translator, reviewer and
@@ -87,7 +87,7 @@ filters and thresholds. Quotas count distinct flattened keys, not characters or
 locale copies. Keys are at most 200 ASCII characters, start with a letter/digit,
 and use letters, digits, `.`, `_`, `-` with no trailing/consecutive dots.
 
-## Manifests, bundles, and generated code
+## Manifests, bundles, and generated code {#manifests-bundles-and-generated-code}
 
 ```ts
 import {
@@ -112,7 +112,7 @@ Type/helper generation does not regenerate a framework's runtime scaffold.
 For repository operations, use Rust-owned CLI `manifest`, `bundle`, `types`,
 `helpers`, `export`, and `import`, rather than implementing a second CLI engine.
 
-## Delivery and isolation
+## Delivery and isolation {#delivery-and-isolation}
 
 `defineLingvaConfig` describes local or CDN runtime delivery. Portable YAML owns
 the CLI; generated `.lingva/generated/runtime.ts` adapts it for JS frameworks.

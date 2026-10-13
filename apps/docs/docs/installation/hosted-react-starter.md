@@ -12,15 +12,16 @@ The hosted React starter is the first end-to-end product template for trying Lin
 4. push bundles to hosted delivery
 5. manage project access from the dashboard
 
-## Scaffold The Integration
+## Scaffold The Integration {#scaffold-the-integration}
 
 Run the automatic setup in the root of the customer-owned React application:
 
 ```bash
 pnpm add @lingva/react
-lingva auth login
-lingva init --sdk react
-lingva check
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --sdk react
+pnpm lingva check
 ```
 
 `lingva init` discovers the signed-in user's projects and prompts only when the
@@ -28,41 +29,49 @@ choice is ambiguous. Open the selected project at `/app/projects/<project-id>`
 to review the generated values and create a read-only delivery key when the
 application uses hosted runtime delivery.
 
-## Verify Local State
+## Verify Local State {#verify-local-state}
 
 ```bash
-lingva check
+pnpm lingva check
 ```
 
-The starter uses `.lingva/translations/{locale}.json` and keeps
-`lingva.config.ts` as its typed React runtime config. Portable and
-non-JavaScript projects use `lingva.config.yaml` instead; do not duplicate the
-same settings in both formats in one directory.
+The automatic setup above creates portable `lingva.config.yaml` and the typed
+React runtime adapter `.lingva/generated/runtime.ts`, with translation files
+in `.lingva/translations/{locale}.json`. Keep YAML as the CLI configuration owner.
 
-## Sign In For Hosted Commands
+The repository example in `examples/hosted-react-starter` instead uses a
+handwritten `lingva.config.ts` and workspace dependencies. It is an in-repository
+implementation reference, not a standalone copy-and-install template. The npm
+adapter supports its trusted executable configuration; do not create a duplicate
+root YAML file alongside it.
+
+## Sign In For Hosted Commands {#sign-in-for-hosted-commands}
 
 Copy the CLI login command from **Consumer application setup**. The CLI
 discovers the environment's public OAuth metadata from the platform:
 
 ```bash
-lingva auth login
-# Stage: lingva auth login --platform-url https://stage.lingva.dev
+pnpm lingva auth login
+# Stage: pnpm lingva auth login --platform-url https://stage.lingva.dev
 ```
 
 For local developer machines, prefer browser login over service tokens. Service tokens should stay reserved for CI and server-only dashboard routes.
 
-## Push Hosted Delivery
+## Push Hosted Delivery {#push-hosted-delivery}
 
 ```bash
-lingva push \
+pnpm lingva push \
   --output-dir .lingva/artifacts/push \
   --api-url "<copy publish URL from Lingva>" \
   --invalidate
 ```
 
-This produces local publish artifacts and sends the same bundles to hosted delivery.
+This sends local translations to hosted delivery and saves the server response
+as `.lingva/artifacts/push/publish-response.json`. It does not write local locale
+bundle files; use `lingva bundle` or endpoint-free `lingva publish` for those.
+The read-only SDK key cannot authorize this write operation.
 
-## App Path
+## App Path {#app-path}
 
 After the project exists in the dashboard:
 
@@ -71,6 +80,6 @@ After the project exists in the dashboard:
 - open `/app/translations` to review and edit translation drafts
 - open `/app/delivery` to inspect publish history and delivery operations
 
-## Why This Starter Exists
+## Why This Starter Exists {#why-this-starter-exists}
 
 This template is intentionally small. It avoids fake API-key flows and focuses on the product path we can already verify today: config, typed React runtime, CLI auth, hosted publish, invalidation, and invite management.
