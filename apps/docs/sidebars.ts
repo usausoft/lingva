@@ -45,7 +45,11 @@ const sidebars: SidebarsConfig = {
       label: sections.examples,
       items: ['installation/next-starter', 'installation/hosted-react-starter'],
     },
-    { type: 'category', label: sections.workspace, items: ['workspace', 'migration/from-static-json'] },
+    {
+      type: 'category',
+      label: sections.workspace,
+      items: ['workspace', 'workspace/github', 'migration/from-static-json'],
+    },
     { type: 'category', label: sections.product, items: ['progress', 'roadmap'] },
   ],
 };
