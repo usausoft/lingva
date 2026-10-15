@@ -7,6 +7,28 @@ import TabItem from '@theme/TabItem';
 
 # React
 
+## Remote: рекомендуемая настройка {#recommended-remote-setup}
+
+Сначала создайте проект в Lingva. Установите SDK и CLI, войдите и выберите проект:
+
+```bash
+pnpm add @lingva/react @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --mode remote --sdk react
+pnpm lingva check
+```
+
+Init создаёт `lingva.config.yaml` и `.lingva/generated/runtime.ts` для удалённой доставки. В разделе **Consumer application setup** проекта создайте SDK-ключ с правом `delivery:read` и настройте его в адаптере среды выполнения с учётом синтаксиса переменных окружения вашего сборщика. Учётные данные публикации должны оставаться только в CLI или на сервере.
+
+Следуйте разделу [Remote в вариантах интеграции](/installation/integration-paths#path-4-hosted-remote-delivery), чтобы подготовить и опубликовать переводы, затем проверить загрузку пакетов приложением.
+
+Подключите сгенерированный `AppLingvaProvider` из `src/lingva/provider.tsx` на границе браузерного приложения. Для SSR с настройками конкретного запроса передавайте конфигурацию прямо в `LingvaProvider`, а не регистрируйте глобальные значения.
+
+## Запасной вариант: только Local {#local-only-fallback}
+
+Используйте примеры с локальными ресурсами ниже, только если нужна доставка из репозитория без учётной записи Lingva. Не запускайте init поверх существующей конфигурации: сохраните переводы и проверьте изменения перед сменой режима.
+
 ## Применение {#usage}
 
 Используйте `@lingva/react`, если вам нужны:
@@ -15,7 +37,7 @@ import TabItem from '@theme/TabItem';
 - типизированные хуки перевода;
 - единый слой интеграции конфигурации среды выполнения Lingva с React.
 
-## Начало работы {#get-started}
+## Примеры локальной интеграции {#get-started}
 
 Добавьте `@lingva/react`, чтобы интегрировать среду выполнения Lingva с React через провайдер.
 

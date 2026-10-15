@@ -7,6 +7,28 @@ sidebar_position: 7
 `@lingva/svelte` exposes Lingva locale, loading, and error state as Svelte
 stores, with typed translation and locale-switching functions.
 
+## Remote: recommended setup {#recommended-remote-setup}
+
+Create a project in Lingva first. Install the SDK and CLI, sign in, and select that project:
+
+```bash
+pnpm add @lingva/svelte @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --mode remote --sdk svelte
+pnpm lingva check
+```
+
+Init creates `lingva.config.yaml` and `.lingva/generated/runtime.ts` for remote delivery. Create a `delivery:read` SDK key in the project's **Consumer application setup** and wire it into the runtime adapter using your bundler's environment syntax. Keep publishing credentials in the CLI or server environment.
+
+Follow [Remote integration steps](/installation/integration-paths#path-4-hosted-remote-delivery) to prepare and publish translations, then verify bundle loading in your application.
+
+Use the generated `appLingva` stores from `src/lib/lingva.ts` in browser components. Remote setup does not generate the local `project.ts` used in the fallback examples below. Create separate runtime instances for server requests.
+
+## Fallback: Local only {#local-only-fallback}
+
+Use the local-resource examples below only when you need repository delivery without a Lingva account. Do not run init over an existing configuration: preserve translations and review changes before switching modes.
+
 ## Install {#install}
 
 ```bash

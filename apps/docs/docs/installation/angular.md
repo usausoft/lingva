@@ -8,6 +8,28 @@ sidebar_position: 6
 injection and signals. It supports local generated resources and remote bundle
 delivery through the same configuration contract.
 
+## Remote: recommended setup {#recommended-remote-setup}
+
+Create a project in Lingva first. Install the SDK and CLI, sign in, and select that project:
+
+```bash
+pnpm add @lingva/angular @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --mode remote --sdk angular
+pnpm lingva check
+```
+
+Init creates `lingva.config.yaml` and `.lingva/generated/runtime.ts` for remote delivery. Create a `delivery:read` SDK key in the project's **Consumer application setup** and wire it into the runtime adapter using your bundler's environment syntax. Keep publishing credentials in the CLI or server environment.
+
+Follow [Remote integration steps](/installation/integration-paths#path-4-hosted-remote-delivery) to prepare and publish translations, then verify bundle loading in your application.
+
+Pass the generated `provideAppLingva()` from `src/lingva/providers.ts` to `bootstrapApplication`. Remote setup does not generate the local `project.ts` used in the fallback examples below.
+
+## Fallback: Local only {#local-only-fallback}
+
+Use the local-resource examples below only when you need repository delivery without a Lingva account. Do not run init over an existing configuration: preserve translations and review changes before switching modes.
+
 ## Install {#install}
 
 ```bash

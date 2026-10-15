@@ -8,6 +8,10 @@ These adapters reuse `@lingva/js`; they are not separate translation engines.
 Check your installed package version. This guide describes the current source
 surface, not proof that every registry version includes it.
 
+## Start with Remote {#start-with-remote}
+
+For a new application, follow the [recommended Remote setup](/installation/integration-paths#path-4-hosted-remote-delivery). Pass the generated remote configuration to your adapter; keep server credentials outside browser builds. The local-resource examples below are a fallback for repository delivery.
+
 ## Node.js {#nodejs}
 
 Install the runtime and CLI, then scaffold local JavaScript resources:

@@ -7,6 +7,28 @@ import TabItem from '@theme/TabItem';
 
 # React
 
+## Remote: recommended setup {#recommended-remote-setup}
+
+Create a project in Lingva first. Install the SDK and CLI, sign in, and select that project:
+
+```bash
+pnpm add @lingva/react @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --mode remote --sdk react
+pnpm lingva check
+```
+
+Init creates `lingva.config.yaml` and `.lingva/generated/runtime.ts` for remote delivery. Create a `delivery:read` SDK key in the project's **Consumer application setup** and wire it into the runtime adapter using your bundler's environment syntax. Keep publishing credentials in the CLI or server environment.
+
+Follow [Remote integration steps](/installation/integration-paths#path-4-hosted-remote-delivery) to prepare and publish translations, then verify bundle loading in your application.
+
+Mount the generated `AppLingvaProvider` from `src/lingva/provider.tsx` at your application's browser boundary. For request-specific SSR, pass config directly to `LingvaProvider` rather than registering a global default.
+
+## Fallback: Local only {#local-only-fallback}
+
+Use the local-resource examples below only when you need repository delivery without a Lingva account. Do not run init over an existing configuration: preserve translations and review changes before switching modes.
+
 ## Usage {#usage}
 
 Use `@lingva/react` when you want:
@@ -15,7 +37,7 @@ Use `@lingva/react` when you want:
 - typed translation hooks
 - one React-friendly integration layer over Lingva runtime config
 
-## Get Started {#get-started}
+## Local integration examples {#get-started}
 
 Add `@lingva/react` when you want a provider-based React integration layer over the Lingva runtime.
 

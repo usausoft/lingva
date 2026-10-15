@@ -5,7 +5,7 @@ slug: /
 
 # Знакомство с Lingva
 
-Lingva предоставляет среды выполнения для переводов, клиентский CLI и переносимые ресурсы переводов. Начните локально без учётной записи, а затем подключите облачную доставку, когда она понадобится приложению.
+Lingva предоставляет среды выполнения для переводов, клиентский CLI и переносимые ресурсы переводов. Начните с Remote: управляйте переводами в Lingva и доставляйте опубликованные пакеты в приложение. Local остаётся запасным вариантом для автономной доставки.
 
 <span id="what-is-broken-today" />
 <span id="what-lingva-aims-to-provide" />
@@ -29,7 +29,17 @@ Lingva предоставляет среды выполнения для пер�
 <span id="how-to-use-lingva-today" />
 <span id="developer-experience-first" />
 
-## Начните с локальной доставки {#start-with-local-delivery}
+## Рекомендуем начать с Remote {#start-with-remote-delivery}
+
+1. Создайте учётную запись Lingva и проект в рабочем пространстве.
+2. [Установите CLI](/installation/overview), затем выполните `lingva auth login`.
+3. Выполните `lingva init --mode remote --sdk vanilla` или выберите SDK своего фреймворка.
+4. В разделе **Consumer application setup** проекта возьмите параметры доставки и создайте SDK-ключ с правом `delivery:read`.
+5. Подготовьте переводы, выполните `lingva check`, затем `lingva push --invalidate` и проверьте загрузку опубликованного пакета приложением.
+
+Подробные шаги приведены в разделе [Варианты интеграции](/installation/integration-paths). Держите учётные данные публикации вне браузерного кода.
+
+## Запасной вариант: только Local {#start-with-local-delivery}
 
 1. [Установите CLI](/installation/overview).
 2. Выполните `lingva init --mode local --no-auth --sdk vanilla` или выберите SDK своего фреймворка.

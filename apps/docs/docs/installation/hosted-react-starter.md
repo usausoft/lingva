@@ -4,13 +4,13 @@ sidebar_position: 4
 
 # Hosted React Starter
 
-The hosted React starter is the first end-to-end product template for trying Lingva as a real workflow:
+Use this recommended starter to connect a React application to Lingva Remote:
 
-1. author translations locally
-2. validate with `lingva check`
-3. sign in with `lingva auth login`
-4. push bundles to hosted delivery
-5. manage project access from the dashboard
+1. create a Lingva account and workspace project
+2. install the SDK and CLI, then sign in with `lingva auth login`
+3. scaffold Remote configuration and configure a read-only delivery SDK key
+4. prepare translations, validate with `lingva check`, and push to hosted delivery
+5. verify bundle loading in your application and manage translations in the workspace
 
 ## Scaffold The Integration {#scaffold-the-integration}
 
@@ -20,7 +20,7 @@ Run the automatic setup in the root of the customer-owned React application:
 pnpm add @lingva/react
 pnpm add -D --allow-build=@lingva/cli @lingva/cli
 pnpm lingva auth login
-pnpm lingva init --sdk react
+pnpm lingva init --mode remote --sdk react
 pnpm lingva check
 ```
 

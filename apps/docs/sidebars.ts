@@ -43,7 +43,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: sections.examples,
-      items: ['installation/next-starter', 'installation/hosted-react-starter'],
+      items: ['installation/hosted-react-starter', 'installation/next-starter'],
     },
     {
       type: 'category',

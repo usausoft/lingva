@@ -12,6 +12,28 @@ runtime surface and adds a Next-facing config helper. The recommended App Router
 path is to use a Client Component provider at the app boundary and keep private
 delivery credentials outside the browser bundle.
 
+## Remote: recommended setup {#recommended-remote-setup}
+
+Create a project in Lingva first. Install the SDK and CLI, sign in, and select that project:
+
+```bash
+pnpm add @lingva/react @lingva/next @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --mode remote --sdk next
+pnpm lingva check
+```
+
+Init creates `lingva.config.yaml` and `.lingva/generated/runtime.ts` for remote delivery. Create a `delivery:read` SDK key in the project's **Consumer application setup** and wire it into the runtime adapter using your bundler's environment syntax. Keep publishing credentials in the CLI or server environment.
+
+Follow [Remote integration steps](/installation/integration-paths#path-4-hosted-remote-delivery) to prepare and publish translations, then verify bundle loading in your application.
+
+Mount the generated `AppLingvaProvider` from `src/lingva/provider.tsx` in `app/layout.tsx`. Remote setup does not generate `project.ts`; keep the generated provider instead of copying the local-only provider below.
+
+## Fallback: Local only {#local-only-fallback}
+
+Use the local-resource examples below only when you need repository delivery without a Lingva account. Do not run init over an existing configuration: preserve translations and review changes before switching modes.
+
 ## 1. Install packages {#1-install-packages}
 
 <Tabs groupId="package-manager">
