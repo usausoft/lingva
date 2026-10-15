@@ -107,7 +107,8 @@ jobs:
           echo "url=${deployment_url}" >> "${GITHUB_OUTPUT}"
 
       - name: Point canonical domain to deployment
-        if: ${{ env.VERCEL_CANONICAL_URL != '' }}
+        # Preview builds must never overwrite the shared public docs domain.
+        if: ${{ inputs.stage == 'prod' && env.VERCEL_CANONICAL_URL != '' }}
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
