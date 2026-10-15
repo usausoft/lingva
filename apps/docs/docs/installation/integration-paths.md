@@ -7,10 +7,140 @@ import TabItem from '@theme/TabItem';
 
 # Integration Paths
 
-Lingva can be adopted gradually. Pick the path that matches how much product
-surface you want on day one.
+Start with Remote delivery to manage and publish translations in Lingva. Use the Local alternatives below when you need offline or repository-only delivery.
 
-## Path 1: Local SDK Only {#path-1-local-sdk-only}
+## Remote: recommended path {#path-4-hosted-remote-delivery}
+
+Use this when you want Lingva to be the source of truth for published bundles
+instead of shipping locale files in your app repository.
+
+### 1. Create a project {#1-create-a-project}
+
+Open the Lingva app and create a customer project in `/app/projects`.
+
+The project detail route is `/app/projects/<project-id>`. Open **Consumer
+application setup** there; it is the source of the copyable values and commands
+used below.
+
+Record:
+
+- project id
+- default locale
+- target locales
+- environment, usually `dev`, `stage`, or `prod`
+
+### 2. Install and authenticate CLI {#4-authenticate-cli}
+
+Prefer browser login for humans. Copy the complete command from **Consumer
+application setup**; the issuer URL and client ID are public OAuth metadata, not
+secrets:
+
+```bash
+pnpm add @lingva/js @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+```
+
+Use service tokens only in CI or server-only routes.
+
+### 3. Create an SDK key {#2-create-an-sdk-key}
+
+From the project setup panel, create a project-scoped SDK key. Customer-created
+keys have only `delivery:read` scope: they identify browser runtime requests and
+support quota/revocation, but cannot author, publish, or administer a project.
+Copy the key when it is shown and put it in the consumer application's runtime
+environment.
+
+Do not put authoring, publishing, administration, or other write credentials in
+`NEXT_PUBLIC_*` variables. Use browser CLI login for human publishing and a
+separate server-only automation credential for CI.
+
+### 4. Initialize Remote config {#3-initialize-or-update-local-config}
+
+```bash
+pnpm lingva init --mode remote \
+  --sdk vanilla \
+  --project-id "<project-id>" \
+  --api-url "<publish URL from Consumer application setup>" \
+  --bundle-url "<bundle URL from Consumer application setup>"
+```
+
+Remote config should keep private values outside browser bundles:
+
+```ts
+import { defineLingvaConfig } from '@lingva/core';
+
+export default defineLingvaConfig({
+  projectId: 'website',
+  environment: 'dev',
+  locale: 'en',
+  fallbackLocale: 'en',
+  apiKey: process.env.NEXT_PUBLIC_LINGVA_API_KEY,
+  delivery: {
+    mode: 'cdn',
+    url: process.env.NEXT_PUBLIC_LINGVA_BUNDLE_URL_TEMPLATE,
+  },
+});
+```
+
+For an existing project, review and update its configuration and runtime adapter; init is for a fresh setup. Do not overwrite working files with `--force`. The TypeScript block above illustrates runtime fields, not a second root config. Vite uses `import.meta.env.VITE_*` instead of `process.env.NEXT_PUBLIC_*`.
+
+### 5. Push translations {#5-push-translations}
+
+```bash
+pnpm lingva check
+pnpm lingva push \
+  --api-url "<publish URL from Lingva>" \
+  --invalidate
+```
+
+The CLI stores the human session in `~/.lingva/credentials.json`. It does not
+automatically load `.env` or `.env.local`; pass generated values explicitly as
+shown, or export them in the shell before running a package script.
+
+### Where each hosted value comes from {#where-each-hosted-value-comes-from}
+
+| Value                        | Where the customer gets it                                                     | Exposure                                   |
+| ---------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------ |
+| Project ID                   | Project URL and heading at `/app/projects/<project-id>`                        | Public configuration                       |
+| Environment                  | Project **Environments** section; start with `dev`                             | Public configuration                       |
+| Bundle URL                   | **Consumer application setup** for the selected environment                    | Public read-only URL                       |
+| SDK key                      | **Create SDK key**; shown once and scoped to `delivery:read`                   | Browser runtime configuration              |
+| Publish API URL              | Generated config and push command in **Consumer application setup**            | Server/CLI configuration; not a credential |
+| CLI issuer URL and client ID | Generated login command in **Consumer application setup**                      | Public OAuth metadata                      |
+| Human CLI credential         | Created by browser login and stored in `~/.lingva/credentials.json`            | Local private credential                   |
+| CI publishing credential     | Provisioned separately by the Lingva operator and saved in the CI secret store | Server-only secret                         |
+
+Run `pnpm lingva pull` to refresh repository locale files from the current
+hosted bundles. After push, verify the published locale through the generated
+bundle URL with the read-scoped SDK key.
+
+For local artifact inspection before hosted mutation:
+
+```bash
+pnpm lingva manifest --output .lingva/artifacts/plan/manifest.json
+pnpm lingva bundle --locale en --output .lingva/artifacts/plan/en.bundle.json
+```
+
+Repeat `bundle` for each locale. These commands never publish. `publish` uploads
+when an endpoint is configured; `--output-dir` does not make it a dry run.
+
+### 6. Consume hosted bundle {#6-consume-hosted-bundle}
+
+Browser applications use the `delivery:read` SDK key. After wiring that key into the generated adapter, load the locale before synchronous translation lookup:
+
+```ts
+import { createLingvaJsRuntime } from '@lingva/js';
+import lingvaConfig from './.lingva/generated/runtime';
+
+const lingva = createLingvaJsRuntime({ ...lingvaConfig });
+await lingva.loadLocale('en');
+console.log(lingva.tSync('common.welcome'));
+```
+
+Use a key that exists in your published bundle. React, Next.js, and other framework adapters provide their own loading lifecycle. If your application needs a delivery proxy, implement it server-side. Keep project-admin, authoring, and publishing credentials server-side.
+
+## Fallback: Local SDK only {#path-1-local-sdk-only}
 
 Use this when you want typed translations in an app without creating a Lingva
 account or using hosted delivery.
@@ -107,7 +237,7 @@ console.log(
 );
 ```
 
-## Path 2: React or Next.js App {#path-2-react-or-nextjs-app}
+## Fallback: Local React or Next.js app {#path-2-react-or-nextjs-app}
 
 Use this when you want a provider, hooks, locale switching, and optional
 inline-editing surfaces.
@@ -191,7 +321,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-## Path 3: Local Authoring With Review {#path-3-local-authoring-with-review}
+## Fallback: Local authoring with review {#path-3-local-authoring-with-review}
 
 Use this when translators or product people need a safer local workflow before
 hosted delivery is enabled.
@@ -217,155 +347,27 @@ and validation in pull requests. Configure `metadataFile` and add an explicit
 Existing projects should add the workflow manually: `init` refuses an existing
 config unless `--force`, which replaces scaffold files.
 
-## Path 4: Hosted Remote Delivery {#path-4-hosted-remote-delivery}
+## Choosing The Right Path {#choosing-the-right-path}
 
-Use this when you want Lingva to be the source of truth for published bundles
-instead of shipping locale files in your app repository.
+| Need                                      | Recommended path                      |
+| ----------------------------------------- | ------------------------------------- |
+| New application with managed translations | Remote (recommended)                  |
+| React/Next app with provider and hooks    | Remote with the framework SDK         |
+| Offline, repository-only delivery         | Fallback: Local SDK only              |
+| Offline translation review                | Fallback: Local authoring with review |
 
-### 1. Create a project {#1-create-a-project}
+## Required Verification Before Shipping {#required-verification-before-shipping}
 
-Open the Lingva app and create a customer project in `/app/projects`.
-
-The project detail route is `/app/projects/<project-id>`. Open **Consumer
-application setup** there; it is the source of the copyable values and commands
-used below.
-
-Record:
-
-- project id
-- default locale
-- target locales
-- environment, usually `dev`, `stage`, or `prod`
-
-### 2. Create an SDK key {#2-create-an-sdk-key}
-
-From the project setup panel, create a project-scoped SDK key. Customer-created
-keys have only `delivery:read` scope: they identify browser runtime requests and
-support quota/revocation, but cannot author, publish, or administer a project.
-Copy the key when it is shown and put it in the consumer application's runtime
-environment.
-
-Do not put authoring, publishing, administration, or other write credentials in
-`NEXT_PUBLIC_*` variables. Use browser CLI login for human publishing and a
-separate server-only automation credential for CI.
-
-### 3. Initialize or update local config {#3-initialize-or-update-local-config}
-
-```bash
-pnpm lingva init --mode remote \
-  --sdk vanilla \
-  --project-id "<project-id>" \
-  --api-url "<publish URL from Consumer application setup>" \
-  --bundle-url "<bundle URL from Consumer application setup>"
-```
-
-Remote config should keep private values outside browser bundles:
-
-```ts
-import { defineLingvaConfig } from '@lingva/core';
-
-export default defineLingvaConfig({
-  projectId: 'website',
-  environment: 'dev',
-  locale: 'en',
-  fallbackLocale: 'en',
-  apiKey: process.env.NEXT_PUBLIC_LINGVA_API_KEY,
-  delivery: {
-    mode: 'cdn',
-    url: process.env.NEXT_PUBLIC_LINGVA_BUNDLE_URL_TEMPLATE,
-  },
-});
-```
-
-### 4. Authenticate CLI {#4-authenticate-cli}
-
-Prefer browser login for humans. Copy the complete command from **Consumer
-application setup**; the issuer URL and client ID are public OAuth metadata, not
-secrets:
-
-```bash
-pnpm lingva auth login
-```
-
-Use service tokens only in CI or server-only routes.
-
-Run login **before** remote init in step 3. To migrate an existing local project,
-edit its YAML endpoint/environment and generated runtime delivery settings;
-do not rerun init over existing files without reviewing `--force` effects.
-The TypeScript block above illustrates runtime fields, not a second root config.
-Use your bundler's environment syntax; Vite uses `import.meta.env.VITE_*`, not
-`process.env.NEXT_PUBLIC_*`.
-
-### 5. Push translations {#5-push-translations}
+For hosted mode:
 
 ```bash
 pnpm lingva check
 pnpm lingva push \
   --api-url "<publish URL from Lingva>" \
   --invalidate
+curl --fail --header "Authorization: Bearer $LINGVA_SDK_KEY" \
+  "<bundle URL from Lingva with {locale} replaced>"
 ```
-
-The CLI stores the human session in `~/.lingva/credentials.json`. It does not
-automatically load `.env` or `.env.local`; pass generated values explicitly as
-shown, or export them in the shell before running a package script.
-
-### Where each hosted value comes from {#where-each-hosted-value-comes-from}
-
-| Value                        | Where the customer gets it                                                     | Exposure                                   |
-| ---------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------ |
-| Project ID                   | Project URL and heading at `/app/projects/<project-id>`                        | Public configuration                       |
-| Environment                  | Project **Environments** section; start with `dev`                             | Public configuration                       |
-| Bundle URL                   | **Consumer application setup** for the selected environment                    | Public read-only URL                       |
-| SDK key                      | **Create SDK key**; shown once and scoped to `delivery:read`                   | Browser runtime configuration              |
-| Publish API URL              | Generated config and push command in **Consumer application setup**            | Server/CLI configuration; not a credential |
-| CLI issuer URL and client ID | Generated login command in **Consumer application setup**                      | Public OAuth metadata                      |
-| Human CLI credential         | Created by browser login and stored in `~/.lingva/credentials.json`            | Local private credential                   |
-| CI publishing credential     | Provisioned separately by the Lingva operator and saved in the CI secret store | Server-only secret                         |
-
-Run `pnpm lingva pull` to refresh repository locale files from the current
-hosted bundles. After push, verify the published locale through the generated
-bundle URL with the read-scoped SDK key.
-
-For local artifact inspection before hosted mutation:
-
-```bash
-pnpm lingva manifest --output .lingva/artifacts/plan/manifest.json
-pnpm lingva bundle --locale en --output .lingva/artifacts/plan/en.bundle.json
-```
-
-Repeat `bundle` for each locale. These commands never publish. `publish` uploads
-when an endpoint is configured; `--output-dir` does not make it a dry run.
-
-### 6. Consume hosted bundle {#6-consume-hosted-bundle}
-
-Browser apps may use a read-scoped SDK key, or consume bundles through an
-authenticated server-side proxy. Keep project-admin, authoring, and publishing
-keys server-side.
-
-Example runtime (the application must provide the authenticated delivery proxy):
-
-```ts
-import { createLingvaJsRuntime } from '@lingva/js';
-
-export const lingva = createLingvaJsRuntime({
-  mode: 'remote',
-  projectId: 'website',
-  locale: 'en',
-  fallbackLocale: 'en',
-  apiUrl: '/api/lingva/delivery',
-});
-```
-
-## Choosing The Right Path {#choosing-the-right-path}
-
-| Need                                   | Recommended path            |
-| -------------------------------------- | --------------------------- |
-| Add typed translations quickly         | Local SDK only              |
-| React/Next app with provider and hooks | React or Next.js app        |
-| Translator-friendly local review       | Local authoring with review |
-| Lingva-hosted source of truth          | Hosted remote delivery      |
-
-## Required Verification Before Shipping {#required-verification-before-shipping}
 
 For local mode:
 
@@ -379,17 +381,6 @@ For React/Next apps:
 pnpm lingva check
 pnpm typecheck
 pnpm build
-```
-
-For hosted mode:
-
-```bash
-pnpm lingva check
-pnpm lingva push \
-  --api-url "<publish URL from Lingva>" \
-  --invalidate
-curl --fail --header "Authorization: Bearer $LINGVA_SDK_KEY" \
-  "<bundle URL from Lingva with {locale} replaced>"
 ```
 
 `lingva pull` downloads hosted bundles and writes only values authored in each

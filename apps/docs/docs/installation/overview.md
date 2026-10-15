@@ -7,17 +7,9 @@ import TabItem from '@theme/TabItem';
 
 # Installation overview
 
-Lingva works best when we keep setup simple:
+Start with **Remote**, Lingva's recommended delivery mode. Create an account and workspace project, connect your SDK, and deliver published translations to your application. Choose **Local** only for offline delivery or resources that must stay in the repository.
 
-1. sign in once with `lingva auth login`
-2. scaffold the default hosted setup with `lingva init`
-3. keep `lingva.config.yaml` as the portable CLI contract; framework scaffolds generate a typed runtime adapter under `.lingva/generated/runtime.ts`. Trusted handwritten `lingva.config.ts` remains an npm-only alternative.
-4. use the adapter for your framework, or `@lingva/js` for framework-agnostic code
-
-If you are not sure which setup you need, start with
-**[Integration Paths](/installation/integration-paths)**. It separates the
-local SDK, React/Next provider, local authoring, hosted remote delivery, and
-offline emulator paths.
+**[Integration paths](/installation/integration-paths)** provides the complete Remote setup and the Local fallback options.
 
 ## Get Started {#get-started}
 
@@ -89,109 +81,46 @@ python -m pip install "lingva-sdk[http]"
 See the **[Python guide](./python.md)** for local sync, hosted pull/push, CI hooks,
 and runtime bundle loading.
 
-Authenticate and scaffold the project:
+## Connect Remote {#connect-remote}
+
+After creating your project, sign in through the CLI and choose **one** SDK for your application:
 
 ```bash
 lingva auth login
-lingva init
-```
-
-Login discovers the OAuth endpoints from `https://lingva.dev` (override with
-`--platform-url`). Init defaults to remote mode, discovers accessible projects,
-auto-selects the only project, or presents a terminal selection when several
-projects are available.
-
-All SDK choices create portable `lingva.config.yaml`. JavaScript choices also
-create `.lingva/generated/runtime.ts` and framework adapters. Python uses only
-the portable files:
-
-```bash
-lingva init --sdk python
-```
-
-The same binary creates the portable config without Node.js or Python:
-
-```bash
-lingva auth login
-lingva init --sdk python
-```
-
-If you are starting a React or Next.js app, you can scaffold the first provider wrapper too:
-
-```bash
-lingva init --sdk react
-lingva init --sdk next
-```
-
-That also creates `src/lingva/provider.tsx` with an app-level provider wrapper.
-
-Angular, Vue, and Svelte have framework-native bootstraps as well:
-
-```bash
-lingva init --sdk angular
-lingva init --sdk vue
-lingva init --sdk svelte
-```
-
-The interactive setup supports React, Next.js, Angular, Vue, Svelte,
-framework-agnostic JavaScript, and Python. Swift, Kotlin, and Flutter
-consume the same hosted bundle contract through source-preview SDKs; use the
-[native SDK guide](./native-bundles.md) for those packages.
-
-If you want to inspect the scaffold first:
-
-```bash
-lingva init --dry-run --format text
-```
-
-`--dry-run` lists every config, locale, generated adapter, and CI file without
-writing. Existing generated files are protected unless you pass `--force`.
-
-For a fully local, account-free repository, opt out explicitly:
-
-```bash
-lingva init --mode local --no-auth --sdk python
-```
-
-To scaffold a complete local React integration in an existing application:
-
-```bash
-pnpm add @lingva/react
-lingva init --mode local --no-auth --sdk react
+lingva init --mode remote --sdk vanilla
 lingva check
 ```
 
-For hosted publishing, open `/app/projects/<project-id>` and copy the login and
-push commands from **Consumer application setup**. Login discovers public
-issuer/client metadata from the selected platform URL.
+Replace `vanilla` with `react`, `next`, `angular`, `vue`, `svelte`, or `python`. Install the matching runtime package before using its adapter. Python uses `lingva-sdk[http]`; JavaScript uses the corresponding `@lingva/<framework>` package.
 
-For a Next.js App Router application:
+Login discovers OAuth metadata from `https://lingva.dev`; use `--platform-url` for another environment. Init defaults to Remote, discovers accessible projects, and prompts when several projects are available.
+
+Every SDK creates portable `lingva.config.yaml` and translation files. JavaScript choices also create `.lingva/generated/runtime.ts` and a framework adapter, such as `src/lingva/provider.tsx` for React/Next. Remote setup does not generate local `.lingva/generated/project.ts`.
+
+Open `/app/projects/<project-id>` → **Consumer application setup**. Confirm the environment, publish URL, and bundle URL; create a `delivery:read` SDK key and wire it into your runtime adapter. Use your bundler's environment syntax. Keep publishing credentials in the CLI or server environment.
+
+Prepare translations in `.lingva/translations/{locale}.json`, then validate and publish:
 
 ```bash
-pnpm add @lingva/next
-lingva init --mode local --no-auth --sdk next
+lingva check
+lingva push --invalidate
+```
+
+Push uses the configured publish endpoint. To override it, copy the URL from the setup panel and pass `--api-url`. Verify that your application loads the published locale using the read-only SDK key.
+
+To preview generated files before writing, run `lingva init --mode remote --sdk vanilla --dry-run --format text` in a fresh project. For existing configuration, review changes manually; do not overwrite working files with `--force`.
+
+## Fallback: Local only {#local-only-fallback}
+
+Use Local when your application needs repository delivery without a Lingva account. For a fresh project, opt out of Remote explicitly:
+
+```bash
+lingva init --mode local --no-auth --sdk vanilla
+lingva sync
 lingva check
 ```
 
-The public [multi-framework demo](https://github.com/usausoft/lingva-demo)
-shows the same translation contract in React, Angular, Vue, Svelte, plain
-JavaScript, Swift, Kotlin, and Flutter. Treat it as an implementation reference;
-the commands above are the supported setup path for a customer repository.
-
-Minimal runtime example:
-
-```ts
-import { createLingvaJsRuntime } from '@lingva/js';
-import lingvaConfig from './.lingva/generated/runtime';
-import project from './.lingva/generated/project';
-
-const lingva = createLingvaJsRuntime({
-  ...lingvaConfig,
-  project,
-});
-
-console.log(lingva.tSync('common.welcome'));
-```
+Select your SDK instead of `vanilla`. Local JavaScript setup generates `.lingva/generated/project.ts` with resource imports. Use that module only for the local examples; Remote uses the generated adapter without a local project import. Preserve translations and review configuration before changing modes.
 
 ## Current Package Model {#current-package-model}
 
@@ -211,32 +140,26 @@ console.log(lingva.tSync('common.welcome'));
 
 ## Recommended Flow {#recommended-flow}
 
-1. Run `lingva init`
-2. Pick `local` or `remote` delivery
-3. Keep portable CLI configuration in `lingva.config.yaml`, or typed JavaScript runtime configuration in `lingva.config.ts`
-4. Run `lingva sync` for locale JSON alignment; `types` emits separate type artifacts
-5. Import the hidden generated project module instead of hand-wiring locale resources
-6. Use `createLingvaJsRuntime()`, `LingvaProvider`, or the generated Next provider
-7. Let components and scripts work with translations, not manual resource plumbing
+1. Create a Lingva project, install the CLI, and sign in.
+2. Connect Remote with `lingva init --mode remote --sdk <sdk>`.
+3. Keep CLI configuration in `lingva.config.yaml` and use the generated runtime adapter in your application.
+4. Configure the read-only SDK key and prepare translations.
+5. Run `lingva check`, then `lingva push --invalidate`.
+6. Verify bundle delivery in the application and add application typechecking and build checks to CI.
 
-For a production application, each path should end with a reproducible check:
-
-- local mode from the config root: `lingva check`
-- React/Next mode: Lingva check plus the app `typecheck` and `build`
-- hosted mode: `lingva push --invalidate` plus current-bundle consumption from
-  the deployed app environment
+Local remains a fallback: `lingva check` validates repository resources and contracts without hosted publication.
 
 ## Verification {#verification}
 
 ```ts
 import { createLingvaJsRuntime } from '@lingva/js';
 import lingvaConfig from './.lingva/generated/runtime';
-import project from './.lingva/generated/project';
 
 const lingva = createLingvaJsRuntime({
   ...lingvaConfig,
-  project,
 });
+
+await lingva.loadLocale('en');
 
 const value = await lingva.t('test.key', {
   variables: { name: 'Lingva' },
@@ -251,8 +174,8 @@ console.log(value);
 - [JavaScript](/installation/js)
 - [React](/installation/react)
 - [Next.js](/installation/nextjs)
-- [Next.js Starter](/installation/next-starter)
 - [Hosted React Starter](/installation/hosted-react-starter)
+- [Next.js Starter](/installation/next-starter)
 - [Python](/installation/python)
 - [Configuration](/installation/configuration)
 - [Progress Checklist](/progress)

@@ -10,7 +10,29 @@ import TabItem from '@theme/TabItem';
 Use `@lingva/js` when you want Lingva outside React: plain browser code, CLI-side
 helpers, build scripts, or site configuration like Docusaurus.
 
-## Get Started {#get-started}
+## Remote: recommended setup {#recommended-remote-setup}
+
+Create a project in Lingva first. Install the SDK and CLI, sign in, and select that project:
+
+```bash
+pnpm add @lingva/js @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --mode remote --sdk vanilla
+pnpm lingva check
+```
+
+Init creates `lingva.config.yaml` and `.lingva/generated/runtime.ts` for remote delivery. Create a `delivery:read` SDK key in the project's **Consumer application setup** and wire it into the runtime adapter using your bundler's environment syntax. Keep publishing credentials in the CLI or server environment.
+
+Follow [Remote integration steps](/installation/integration-paths#path-4-hosted-remote-delivery) to prepare and publish translations, then verify bundle loading in your application.
+
+Create the runtime with the generated config and await `lingva.loadLocale('en')` before calling `tSync`. Remote setup does not generate a local `project.ts`.
+
+## Fallback: Local only {#local-only-fallback}
+
+Use the local-resource examples below only when you need repository delivery without a Lingva account. Do not run init over an existing configuration: preserve translations and review changes before switching modes.
+
+## Local integration examples {#get-started}
 
 ### 1. Install the package {#1-install-the-package}
 

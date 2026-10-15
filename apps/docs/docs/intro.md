@@ -5,7 +5,7 @@ slug: /
 
 # Introduction to Lingva
 
-Lingva provides translation runtimes, a customer CLI, and portable translation resources. Start locally without an account, then connect hosted delivery when your application needs it.
+Lingva provides translation runtimes, a customer CLI, and portable translation resources. Start with Remote: manage translations in Lingva and deliver published bundles to your application. Local remains a fallback for offline delivery.
 
 <span id="what-is-broken-today" />
 <span id="what-lingva-aims-to-provide" />
@@ -29,7 +29,17 @@ The npm and Python CLI adapters are released as `0.1.5`. Guides describe this ch
 <span id="how-to-use-lingva-today" />
 <span id="developer-experience-first" />
 
-## Start with local delivery {#start-with-local-delivery}
+## Start with Remote (recommended) {#start-with-remote-delivery}
+
+1. Create a Lingva account and a project in the workspace.
+2. [Install the CLI](/installation/overview), then run `lingva auth login`.
+3. Run `lingva init --mode remote --sdk vanilla`, or select your framework's SDK.
+4. Copy delivery settings from the project's **Consumer application setup** and create a `delivery:read` SDK key.
+5. Prepare translations, run `lingva check`, then `lingva push --invalidate`, and verify that your application loads the published bundle.
+
+Follow [Integration paths](/installation/integration-paths) for the complete setup. Keep publishing credentials outside browser code.
+
+## Fallback: Local-only delivery {#start-with-local-delivery}
 
 1. [Install the CLI](/installation/overview).
 2. Run `lingva init --mode local --no-auth --sdk vanilla`, or select the SDK for your framework.

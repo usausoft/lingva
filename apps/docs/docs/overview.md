@@ -4,14 +4,14 @@ sidebar_position: 2
 
 # Documentation overview
 
-Choose a guide by the task you need to complete. Examples start with local delivery; hosted workflows require a project and appropriate credentials.
+Choose a guide by the task you need to complete. Remote delivery is the recommended starting point: create a Lingva project, connect your application, and publish translations. Choose Local only when you need repository-only or offline delivery.
 
 <span id="start-here" />
 <span id="what-belongs-in-docs" />
 
 ## Set up a project {#set-up-a-project}
 
-- [Installation overview](/installation/overview): install the CLI and scaffold a local project.
+- [Installation overview](/installation/overview): install the CLI and connect a Remote project.
 - [Integration paths](/installation/integration-paths): choose an SDK and delivery mode.
 - [Configuration](/installation/configuration): portable configuration and generated artifacts.
 - [Migrate static JSON](/migration/from-static-json): import existing translations.
@@ -34,8 +34,8 @@ Choose a guide by the task you need to complete. Examples start with local deliv
 
 ## Try a starter {#try-a-starter}
 
+- [Hosted React starter](/installation/hosted-react-starter): recommended hosted setup for a React application.
 - [Next.js starter](/installation/next-starter): repository resources and local bundles.
-- [Hosted React starter](/installation/hosted-react-starter): transition from local to hosted delivery.
 
 ## Check product status {#check-product-status}
 

@@ -7,17 +7,9 @@ import TabItem from '@theme/TabItem';
 
 # Обзор установки
 
-Настройка Lingva остаётся простой, если следовать такому порядку:
+Начните с **Remote** — рекомендуемого режима Lingva. Создайте учётную запись и проект в рабочем пространстве, подключите SDK и доставляйте опубликованные переводы в приложение. Используйте **Local** только для автономной доставки или ресурсов, которые должны оставаться в репозитории.
 
-1. войдите один раз с помощью `lingva auth login`
-2. создайте начальную конфигурацию для размещённой платформы командой `lingva init`
-3. используйте `lingva.config.yaml` как переносимый контракт CLI; шаблоны для фреймворков создают типизированный адаптер среды выполнения в `.lingva/generated/runtime.ts`. Написанный вручную доверенный `lingva.config.ts` остаётся альтернативой только для npm.
-4. используйте адаптер своего фреймворка или `@lingva/js` для кода, не зависящего от фреймворка
-
-Если вы не уверены, какой вариант выбрать, начните с
-**[Вариантов интеграции](/installation/integration-paths)**. Там отдельно описаны
-локальный SDK, провайдер React/Next, локальная работа над переводами, доставка
-с размещённой платформы и автономный эмулятор.
+В разделе **[Варианты интеграции](/installation/integration-paths)** приведены полные шаги Remote и запасные локальные варианты.
 
 ## Начало работы {#get-started}
 
@@ -91,113 +83,46 @@ python -m pip install "lingva-sdk[http]"
 получение и отправка переводов на платформу, автоматизация CI и загрузка пакетов
 переводов во время выполнения.
 
-Войдите и создайте начальные файлы проекта:
+## Подключите Remote {#connect-remote}
+
+После создания проекта войдите в CLI и выберите **один** SDK для приложения:
 
 ```bash
 lingva auth login
-lingva init
-```
-
-Вход получает адреса OAuth из `https://lingva.dev` (адрес можно изменить через
-`--platform-url`). Init по умолчанию использует удалённый режим, находит доступные
-проекты, автоматически выбирает единственный проект или предлагает выбор в
-терминале, если проектов несколько.
-
-Каждый вариант SDK создаёт переносимый `lingva.config.yaml`. Варианты JavaScript
-также создают `.lingva/generated/runtime.ts` и адаптеры фреймворков. Python
-использует только переносимые файлы:
-
-```bash
-lingva init --sdk python
-```
-
-Тот же исполняемый файл создаёт переносимую конфигурацию без Node.js и Python:
-
-```bash
-lingva auth login
-lingva init --sdk python
-```
-
-Если вы начинаете приложение на React или Next.js, можно также создать первый
-компонент-обёртку провайдера:
-
-```bash
-lingva init --sdk react
-lingva init --sdk next
-```
-
-При этом создаётся `src/lingva/provider.tsx` с обёрткой провайдера для приложения.
-
-Для Angular, Vue и Svelte также доступны начальные файлы с учётом фреймворка:
-
-```bash
-lingva init --sdk angular
-lingva init --sdk vue
-lingva init --sdk svelte
-```
-
-Интерактивная настройка поддерживает React, Next.js, Angular, Vue, Svelte,
-JavaScript без привязки к фреймворку и Python. Swift, Kotlin и Flutter используют
-тот же контракт пакетов переводов с платформы через предварительные версии SDK,
-доступные в исходном коде; эти пакеты описаны в
-[руководстве по нативным SDK](./native-bundles.md).
-
-Чтобы сначала посмотреть, какие файлы будут созданы:
-
-```bash
-lingva init --dry-run --format text
-```
-
-`--dry-run` перечисляет все файлы конфигурации, локалей, сгенерированных адаптеров
-и CI без записи на диск. Существующие сгенерированные файлы защищены от
-перезаписи, если не передать `--force`.
-
-Для полностью локального репозитория без учётной записи отключите подключение
-явно:
-
-```bash
-lingva init --mode local --no-auth --sdk python
-```
-
-Чтобы создать полную локальную интеграцию React в существующем приложении:
-
-```bash
-pnpm add @lingva/react
-lingva init --mode local --no-auth --sdk react
+lingva init --mode remote --sdk vanilla
 lingva check
 ```
 
-Для публикации на платформе откройте `/app/projects/<project-id>` и скопируйте
-команды входа и отправки из раздела **Consumer application setup**. Вход получает
-публичные сведения об издателе OAuth и клиенте из выбранного адреса платформы.
+Замените `vanilla` на `react`, `next`, `angular`, `vue`, `svelte` или `python`. Установите соответствующий пакет среды выполнения перед использованием адаптера. Для Python используйте `lingva-sdk[http]`; для JavaScript — пакет `@lingva/<framework>`.
 
-Для приложения Next.js с App Router:
+Вход получает метаданные OAuth из `https://lingva.dev`; для другого окружения используйте `--platform-url`. Init по умолчанию использует Remote, обнаруживает доступные проекты и предлагает выбор, если их несколько.
+
+Каждый SDK создаёт переносимый `lingva.config.yaml` и файлы переводов. Варианты JavaScript также создают `.lingva/generated/runtime.ts` и адаптер фреймворка, например `src/lingva/provider.tsx` для React/Next. Удалённая настройка не создаёт локальный `.lingva/generated/project.ts`.
+
+Откройте `/app/projects/<project-id>` → **Consumer application setup**. Проверьте окружение, адреса публикации и пакетов, создайте SDK-ключ с правом `delivery:read` и настройте его в адаптере среды выполнения. Используйте синтаксис переменных окружения вашего сборщика. Учётные данные публикации должны оставаться только в CLI или на сервере.
+
+Подготовьте переводы в `.lingva/translations/{locale}.json`, затем проверьте и опубликуйте их:
 
 ```bash
-pnpm add @lingva/next
-lingva init --mode local --no-auth --sdk next
+lingva check
+lingva push --invalidate
+```
+
+Push использует адрес публикации из конфигурации. Если его нужно задать явно, скопируйте URL из панели настройки и передайте `--api-url`. Проверьте загрузку опубликованной локали приложением с SDK-ключом только для чтения.
+
+Чтобы проверить начальные файлы до записи, выполните `lingva init --mode remote --sdk vanilla --dry-run --format text` в новом проекте. Для существующей конфигурации проверьте изменения вручную; не перезаписывайте рабочие файлы через `--force`.
+
+## Запасной вариант: только Local {#local-only-fallback}
+
+Используйте Local, если приложению нужна доставка из репозитория без учётной записи Lingva. Для нового проекта явно отключите Remote:
+
+```bash
+lingva init --mode local --no-auth --sdk vanilla
+lingva sync
 lingva check
 ```
 
-Публичный [пример с несколькими фреймворками](https://github.com/usausoft/lingva-demo)
-показывает тот же контракт переводов в React, Angular, Vue, Svelte, обычном
-JavaScript, Swift, Kotlin и Flutter. Используйте его как пример реализации;
-команды выше — поддерживаемый способ настройки клиентского репозитория.
-
-Минимальный пример среды выполнения:
-
-```ts
-import { createLingvaJsRuntime } from '@lingva/js';
-import lingvaConfig from './.lingva/generated/runtime';
-import project from './.lingva/generated/project';
-
-const lingva = createLingvaJsRuntime({
-  ...lingvaConfig,
-  project,
-});
-
-console.log(lingva.tSync('common.welcome'));
-```
+Выберите свой SDK вместо `vanilla`. В локальном режиме JavaScript создаётся `.lingva/generated/project.ts` с импортами ресурсов. Этот файл используется только в локальных примерах; для Remote используйте сгенерированный адаптер без импорта локального проекта. Сохраните переводы и проверьте конфигурацию перед сменой режима.
 
 ## Текущая модель пакетов {#current-package-model}
 
@@ -215,35 +140,28 @@ console.log(lingva.tSync('common.welcome'));
 | `lingva-sdk`         | Среда выполнения переводов Python (без CLI начиная с 0.1.5)                        | Серверные приложения, фоновые задачи и приложения Python                 |
 | `lingva-cli`         | Отдельный установщик клиентского CLI на Rust (0.1.5)                               | Инструменты разработки Python и CI                                       |
 
-## Рекомендуемый порядок {#recommended-flow}
+## Рекомендуемый процесс {#recommended-flow}
 
-1. Выполните `lingva init`
-2. Выберите доставку `local` или `remote`
-3. Храните переносимую конфигурацию CLI в `lingva.config.yaml`, а типизированную конфигурацию среды выполнения JavaScript — в `lingva.config.ts`
-4. Выполните `lingva sync` для согласования JSON-файлов локалей; `types` создаёт отдельные файлы типов
-5. Импортируйте скрытый сгенерированный модуль проекта вместо ручного подключения ресурсов локалей
-6. Используйте `createLingvaJsRuntime()`, `LingvaProvider` или сгенерированный провайдер Next
-7. Пусть компоненты и скрипты работают с переводами, а не с ручным подключением ресурсов
+1. Создайте проект Lingva, установите CLI и войдите.
+2. Подключите Remote через `lingva init --mode remote --sdk <sdk>`.
+3. Используйте `lingva.config.yaml` для CLI и сгенерированный адаптер для приложения.
+4. Настройте SDK-ключ только для чтения и подготовьте переводы.
+5. Выполните `lingva check`, затем `lingva push --invalidate`.
+6. Проверьте доставку пакета в приложении и добавьте проверки типов и сборку приложения в CI.
 
-Для рабочего приложения каждый вариант должен завершаться воспроизводимой
-проверкой:
-
-- локальный режим из корня конфигурации: `lingva check`
-- режим React/Next: проверка Lingva, а также `typecheck` и `build` приложения
-- режим платформы: `lingva push --invalidate` и получение текущего пакета
-  переводов из развёрнутого окружения приложения
+Local остаётся запасным вариантом: `lingva check` проверяет ресурсы и контракты без публикации на платформе.
 
 ## Проверка {#verification}
 
 ```ts
 import { createLingvaJsRuntime } from '@lingva/js';
 import lingvaConfig from './.lingva/generated/runtime';
-import project from './.lingva/generated/project';
 
 const lingva = createLingvaJsRuntime({
   ...lingvaConfig,
-  project,
 });
+
+await lingva.loadLocale('en');
 
 const value = await lingva.t('test.key', {
   variables: { name: 'Lingva' },
@@ -258,8 +176,8 @@ console.log(value);
 - [JavaScript](/installation/js)
 - [React](/installation/react)
 - [Next.js](/installation/nextjs)
-- [Начальный проект Next.js](/installation/next-starter)
 - [Начальный проект React с платформой](/installation/hosted-react-starter)
+- [Начальный проект Next.js](/installation/next-starter)
 - [Python](/installation/python)
 - [Конфигурация](/installation/configuration)
 - [Список реализованных возможностей](/progress)

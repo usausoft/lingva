@@ -12,6 +12,28 @@ import TabItem from '@theme/TabItem';
 Рекомендуемый подход для App Router — провайдер в клиентском компоненте на границе
 приложения; закрытые учётные данные доставки должны оставаться вне браузерной сборки.
 
+## Remote: рекомендуемая настройка {#recommended-remote-setup}
+
+Сначала создайте проект в Lingva. Установите SDK и CLI, войдите и выберите проект:
+
+```bash
+pnpm add @lingva/react @lingva/next @lingva/core
+pnpm add -D --allow-build=@lingva/cli @lingva/cli
+pnpm lingva auth login
+pnpm lingva init --mode remote --sdk next
+pnpm lingva check
+```
+
+Init создаёт `lingva.config.yaml` и `.lingva/generated/runtime.ts` для удалённой доставки. В разделе **Consumer application setup** проекта создайте SDK-ключ с правом `delivery:read` и настройте его в адаптере среды выполнения с учётом синтаксиса переменных окружения вашего сборщика. Учётные данные публикации должны оставаться только в CLI или на сервере.
+
+Следуйте разделу [Remote в вариантах интеграции](/installation/integration-paths#path-4-hosted-remote-delivery), чтобы подготовить и опубликовать переводы, затем проверить загрузку пакетов приложением.
+
+Подключите сгенерированный `AppLingvaProvider` из `src/lingva/provider.tsx` в `app/layout.tsx`. Удалённая настройка не создаёт `project.ts`; используйте сгенерированный провайдер, а не локальный пример ниже.
+
+## Запасной вариант: только Local {#local-only-fallback}
+
+Используйте примеры с локальными ресурсами ниже, только если нужна доставка из репозитория без учётной записи Lingva. Не запускайте init поверх существующей конфигурации: сохраните переводы и проверьте изменения перед сменой режима.
+
 ## 1. Установите пакеты {#1-install-packages}
 
 <Tabs groupId="package-manager">
