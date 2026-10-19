@@ -11,9 +11,9 @@ Engine version **0.1.4** provides the complete command surface below. Verify
 
 ## Customer command surface
 
-All 23 customer commands execute in Rust:
+Customer commands execute in Rust:
 
-- `lingva auth login|use-key|status|logout`
+- `lingva auth login|sso|use-key|status|logout`
 - `lingva init`
 - `lingva update`
 - `lingva sync|check`
@@ -143,3 +143,20 @@ Release archives cover macOS ARM64/x64, Linux ARM64 GNU/x64 musl, and Windows
 x64. Adapters verify SHA-256 against the distributed checksum file. This proves
 archive integrity relative to that file, not independent publisher authenticity;
 the registry/CDN and any configured asset mirror remain trust boundaries.
+
+## Business organization SSO
+
+Sign in to your native platform account first, then verify the organization:
+
+```bash
+lingva auth login
+lingva auth sso --organization-id org_example
+```
+
+The browser asks you to confirm SSO using the same native account. The CLI polls
+for verification of its existing access token; it stores no provider token and
+creates no membership. Accept the organization's invitation separately. Use
+`--no-browser` to open the displayed URL manually and `--platform-url` for another
+platform origin. The default timeout is 600 seconds. Token refresh requires fresh
+SSO verification. Project API keys remain separate credentials for unattended
+project operations and do not represent organization user sessions.

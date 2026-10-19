@@ -12,6 +12,7 @@ mod credentials;
 mod customer;
 mod extraction;
 mod local;
+mod organization_sso;
 mod project;
 mod state;
 mod transaction;
@@ -141,6 +142,8 @@ enum Command {
 enum AuthCommand {
     /// Sign in with OAuth PKCE in a browser.
     Login(AuthLoginArgs),
+    /// Verify Business organization SSO for the current native account token.
+    Sso(AuthSsoArgs),
     /// Store a project API key for local and CI use.
     UseKey(AuthKeyArgs),
     /// Show the active credential type.
@@ -171,6 +174,18 @@ struct AuthLoginArgs {
     device: bool,
     #[arg(long)]
     device_url: Option<String>,
+}
+
+#[derive(Debug, Args)]
+struct AuthSsoArgs {
+    #[arg(long)]
+    organization_id: String,
+    #[arg(long)]
+    platform_url: Option<String>,
+    #[arg(long)]
+    no_browser: bool,
+    #[arg(long, default_value_t = 600)]
+    timeout: u64,
 }
 
 #[derive(Debug, Args)]
@@ -408,6 +423,16 @@ fn run_auth(command: AuthCommand) -> Result<u8> {
                     .map(|value| format!("; token expires {value}"))
                     .unwrap_or_default()
             );
+            Ok(EXIT_SUCCESS)
+        }
+        AuthCommand::Sso(args) => {
+            organization_sso::verify(
+                &path,
+                &args.organization_id,
+                args.platform_url.as_deref(),
+                !args.no_browser,
+                args.timeout,
+            )?;
             Ok(EXIT_SUCCESS)
         }
         AuthCommand::UseKey(args) => {
