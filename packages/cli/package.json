@@ -1,6 +1,6 @@
 {
   "name": "@lingva/cli",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Command-line tooling for Lingva localization projects",
   "type": "module",
   "license": "SEE LICENSE IN LICENSE.md",
@@ -42,7 +42,7 @@
     "lingva-installer.ps1",
     "lingva-installer.sh"
   ],
-  "lingvaEngineVersion": "0.1.5",
+  "lingvaEngineVersion": "0.1.6",
   "scripts": {
     "build": "node ../../scripts/build-package.mjs --copy-cli-templates",
     "dev": "LINGVA_DEV_BUILD=true tsdown --watch",

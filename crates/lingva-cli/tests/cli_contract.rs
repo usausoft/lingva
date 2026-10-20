@@ -84,6 +84,8 @@ fn serve_once(
 fn serve_sequence(responses: Vec<MockResponse>) -> (String, Receiver<CapturedRequest>) {
     let server = Server::http("127.0.0.1:0").unwrap();
     let address = format!("http://{}", server.server_addr());
+    // Response scripts may bind returned URLs to this ephemeral server origin.
+    let response_origin = address.clone();
     let (sender, receiver) = mpsc::channel();
     thread::spawn(move || {
         for (status, headers, body) in responses {
@@ -108,7 +110,9 @@ fn serve_sequence(responses: Vec<MockResponse>) -> (String, Receiver<CapturedReq
                     .collect(),
                 body: request_body,
             });
-            let mut response = Response::from_string(body).with_status_code(StatusCode(status));
+            let mut response =
+                Response::from_string(body.replace("$MOCK_ORIGIN", &response_origin))
+                    .with_status_code(StatusCode(status));
             for (name, value) in headers {
                 response = response.with_header(Header::from_bytes(name, value).unwrap());
             }
@@ -2121,5 +2125,191 @@ fn browser_login_validates_callback_state_and_exchanges_matching_pkce_verifier()
             assert_eq!(challenge, query["code_challenge"]);
             assert_eq!(form["redirect_uri"], query["redirect_uri"]);
         }
+    }
+}
+
+fn save_native_sso_credentials(root: &std::path::Path, platform_url: &str) -> Vec<u8> {
+    let directory = root.join("home/.lingva");
+    fs::create_dir_all(&directory).unwrap();
+    let bytes = serde_json::to_vec(&serde_json::json!({
+        "accessToken": "native-sso-access-token",
+        "expiresAt": "2999-01-01T00:00:00Z",
+        "obtainedAt": "2026-01-01T00:00:00Z",
+        "platformUrl": platform_url,
+    }))
+    .unwrap();
+    fs::write(directory.join("credentials.json"), &bytes).unwrap();
+    bytes
+}
+
+#[test]
+fn auth_sso_posts_request_and_status_for_the_same_native_token_and_organization() {
+    let root = tempfile::tempdir().unwrap();
+    let (platform_url, captured) = serve_sequence(vec![
+        (
+            200,
+            vec![("content-type", "application/json")],
+            r#"{"authorizationUrl":"$MOCK_ORIGIN/app/organizations/sso?request=browser-confirmation"}"#,
+        ),
+        (
+            200,
+            vec![("content-type", "application/json")],
+            r#"{"verified":true}"#,
+        ),
+    ]);
+    let original_credentials = save_native_sso_credentials(root.path(), &platform_url);
+    let output = lingva(root.path())
+        .args([
+            "auth",
+            "sso",
+            "--no-browser",
+            "--organization-id",
+            "org_acme",
+        ])
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains(&format!(
+        "{platform_url}/app/organizations/sso?request=browser-confirmation"
+    )));
+    assert!(stdout.contains("Organization SSO verified"));
+    assert!(!stdout.contains("native-sso-access-token"));
+    for action in ["request", "status"] {
+        let request = captured
+            .recv_timeout(std::time::Duration::from_secs(5))
+            .unwrap();
+        assert_eq!(request.method, "POST");
+        assert_eq!(request.url, "/api/cli/organizations/sso");
+        assert_eq!(
+            request.headers["authorization"],
+            "Bearer native-sso-access-token"
+        );
+        assert_eq!(
+            serde_json::from_str::<Value>(&request.body).unwrap(),
+            serde_json::json!({ "action": action, "organizationId": "org_acme" })
+        );
+    }
+    assert_eq!(
+        fs::read(root.path().join("home/.lingva/credentials.json")).unwrap(),
+        original_credentials
+    );
+}
+
+#[test]
+fn auth_sso_refuses_project_api_keys_before_contacting_the_platform() {
+    let root = tempfile::tempdir().unwrap();
+    let (platform_url, captured) = serve_once(500, &[], "must not be contacted");
+    let saved = lingva(root.path())
+        .args([
+            "auth",
+            "use-key",
+            "--api-key",
+            "project-only-secret",
+            "--format",
+            "json",
+        ])
+        .output()
+        .unwrap();
+    assert!(saved.status.success());
+    let output = lingva(root.path())
+        .args([
+            "auth",
+            "sso",
+            "--no-browser",
+            "--organization-id",
+            "org_acme",
+            "--platform-url",
+            &platform_url,
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .contains("Project API keys do not represent user sessions")
+    );
+    assert!(!String::from_utf8_lossy(&output.stderr).contains("project-only-secret"));
+    assert!(matches!(
+        captured.recv_timeout(std::time::Duration::from_millis(50)),
+        Err(mpsc::RecvTimeoutError::Timeout)
+    ));
+}
+
+#[test]
+fn auth_sso_rejects_external_authorization_urls_before_polling() {
+    let root = tempfile::tempdir().unwrap();
+    let (platform_url, captured) = serve_sequence(vec![(
+        200,
+        vec![("content-type", "application/json")],
+        r#"{"authorizationUrl":"https://external.example/app/organizations/sso?request=untrusted"}"#,
+    )]);
+    let original_credentials = save_native_sso_credentials(root.path(), &platform_url);
+    let output = lingva(root.path())
+        .args([
+            "auth",
+            "sso",
+            "--no-browser",
+            "--organization-id",
+            "org_acme",
+        ])
+        .output()
+        .unwrap();
+    assert!(!output.status.success());
+    assert!(String::from_utf8_lossy(&output.stderr).contains("outside the configured platform"));
+    assert!(!String::from_utf8_lossy(&output.stdout).contains("https://external.example"));
+    let request = captured
+        .recv_timeout(std::time::Duration::from_secs(5))
+        .unwrap();
+    assert_eq!(
+        serde_json::from_str::<Value>(&request.body).unwrap()["action"],
+        "request"
+    );
+    assert!(
+        captured
+            .recv_timeout(std::time::Duration::from_millis(50))
+            .is_err()
+    );
+    assert_eq!(
+        fs::read(root.path().join("home/.lingva/credentials.json")).unwrap(),
+        original_credentials
+    );
+}
+
+#[test]
+fn auth_sso_rejects_invalid_organization_ids_and_timeouts_without_credentials_or_requests() {
+    let root = tempfile::tempdir().unwrap();
+    for (organization, timeout, expected) in [
+        ("../other", "30", "Organization ID is invalid"),
+        (
+            "org_acme",
+            "0",
+            "SSO timeout must be between 1 and 600 seconds",
+        ),
+        (
+            "org_acme",
+            "601",
+            "SSO timeout must be between 1 and 600 seconds",
+        ),
+    ] {
+        let output = lingva(root.path())
+            .args([
+                "auth",
+                "sso",
+                "--no-browser",
+                "--organization-id",
+                organization,
+                "--timeout",
+                timeout,
+            ])
+            .output()
+            .unwrap();
+        assert!(!output.status.success());
+        assert!(String::from_utf8_lossy(&output.stderr).contains(expected));
+        assert!(!root.path().join("home/.lingva/credentials.json").exists());
     }
 }

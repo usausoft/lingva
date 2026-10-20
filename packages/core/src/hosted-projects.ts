@@ -252,6 +252,8 @@ export interface LingvaHostedProjectAuditEvent {
 }
 
 export interface LingvaHostedProjectRecord {
+  /** Present after explicit organization migration; legacy records omit it. */
+  organizationId?: string;
   createdAt?: string;
   defaultLocale: string;
   description?: string;
