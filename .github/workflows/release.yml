@@ -1,6 +1,12 @@
 name: Public SDK Release
 
 on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing immutable SDK tag to retry from main
+        required: true
+        type: string
   push:
     branches:
       - main
@@ -8,10 +14,11 @@ on:
       - 'v*'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ inputs.release_tag || github.ref_name }}
   cancel-in-progress: false
 
 env:
+  SDK_RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
   CI: true
   NODE_VERSION: 24
   NPM_CONFIG_PROVENANCE: true
@@ -25,11 +32,27 @@ jobs:
       contents: read
     outputs:
       mode: ${{ steps.release-mode.outputs.mode }}
+      revision: ${{ steps.identity.outputs.revision }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ inputs.release_tag || github.ref }}
+
+      - name: Resolve reviewed release revision
+        id: identity
+        env:
+          RETRY: ${{ github.event_name == 'workflow_dispatch' }}
+          WORKFLOW_REF: ${{ github.ref }}
+        run: |
+          if [ "$RETRY" = true ]; then
+            test "$WORKFLOW_REF" = refs/heads/main
+            [[ "$SDK_RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+            test "$(git rev-parse "refs/tags/$SDK_RELEASE_TAG^{commit}")" = "$(git rev-parse HEAD)"
+            git merge-base --is-ancestor HEAD origin/main
+          fi
+          echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -61,14 +84,14 @@ jobs:
           pnpm verify:packages
 
       - name: Verify immutable SDK release identity
-        if: ${{ github.ref_type == 'tag' }}
-        run: node --input-type=module -e 'import fs from "node:fs"; const version=JSON.parse(fs.readFileSync("packages/core/package.json")).version; if(process.env.GITHUB_REF_NAME!==`v${version}`) throw new Error("SDK tag must match package version"); for(const name of JSON.parse(process.env.CI_PACKAGES)){if(JSON.parse(fs.readFileSync(`packages/${name.slice(8)}/package.json`)).version!==version) throw new Error(`SDK version mismatch ${name}`);}'
+        if: ${{ github.ref_type == 'tag' || github.event_name == 'workflow_dispatch' }}
+        run: node --input-type=module -e 'import fs from "node:fs"; const version=JSON.parse(fs.readFileSync("packages/core/package.json")).version; if(process.env.SDK_RELEASE_TAG!==`v${version}`) throw new Error("SDK tag must match package version"); for(const name of JSON.parse(process.env.CI_PACKAGES)){if(JSON.parse(fs.readFileSync(`packages/${name.slice(8)}/package.json`)).version!==version) throw new Error(`SDK version mismatch ${name}`);}'
         env:
           CI_PACKAGES: '["@lingva/core","@lingva/js","@lingva/node","@lingva/react","@lingva/next","@lingva/angular","@lingva/vue","@lingva/svelte","@lingva/docusaurus","@lingva/electron"]'
 
       - name: Select version or publish mode
         id: release-mode
-        if: ${{ github.ref_type == 'branch' }}
+        if: ${{ github.event_name == 'push' && github.ref_type == 'branch' }}
         uses: changesets/action/select-mode@v2
 
   version:
@@ -108,8 +131,9 @@ jobs:
   publish:
     name: Publish public packages
     # The reviewed Changesets version PR lands on main first. Publishing only
-    # begins when an operator creates a protected v* tag on that exact commit.
-    if: ${{ github.ref_type == 'tag' }}
+    # begins from an immutable v* tag. Manual recovery validates the same tagged
+    # revision and quality gates; it never moves or replaces a release tag.
+    if: ${{ github.ref_type == 'tag' || github.event_name == 'workflow_dispatch' }}
     needs: verify
     runs-on: ubuntu-latest
     environment: Production
@@ -121,6 +145,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ needs.verify.outputs.revision }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -136,6 +161,36 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Check npm OIDC authentication without exposing credentials
+        env:
+          FORCE_COLOR: 0
+        run: |
+          node --input-type=module <<'JS'
+          const audience = 'npm:registry.npmjs.org';
+          const endpoint = new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          endpoint.searchParams.set('audience', audience);
+          const identity = await fetch(endpoint, {
+            headers: { Authorization: `Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}` },
+          });
+          if (!identity.ok) throw new Error(`GitHub OIDC request failed: ${identity.status}`);
+          const { value } = await identity.json();
+          console.log(`::add-mask::${value}`);
+          const claims = JSON.parse(Buffer.from(value.split('.')[1], 'base64url'));
+          console.log(JSON.stringify({ repository: claims.repository, workflow: claims.job_workflow_ref, subject: claims.sub, audience: claims.aud }));
+          const exchange = await fetch('https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/@lingva%2fcore', {
+            method: 'POST', headers: { Authorization: `Bearer ${value}` },
+          });
+          if (!exchange.ok) {
+            const body = await exchange.json().catch(() => ({}));
+            console.error(`npm OIDC exchange failed: HTTP ${exchange.status}; code=${String(body.code || body.error || 'unknown').replace(/[^a-zA-Z0-9_ -]/g, '').slice(0, 120)}`);
+            process.exit(1);
+          }
+          const { token } = await exchange.json();
+          if (!token) throw new Error('npm OIDC exchange returned no token');
+          console.log(`::add-mask::${token}`);
+          console.log('npm accepted this workflow identity for @lingva/core.');
+          JS
 
       - name: Publish with npm trusted publishing
         uses: changesets/action/publish@v2
