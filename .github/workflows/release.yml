@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Existing immutable SDK tag to retry from main
+        description: Existing immutable SDK tag to retry from its sdk-recovery tag
         required: true
         type: string
   push:
@@ -47,8 +47,9 @@ jobs:
           WORKFLOW_REF: ${{ github.ref }}
         run: |
           if [ "$RETRY" = true ]; then
-            test "$WORKFLOW_REF" = refs/heads/main
             [[ "$SDK_RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+            test "$WORKFLOW_REF" = "refs/tags/sdk-recovery/$SDK_RELEASE_TAG"
+            git merge-base --is-ancestor "$GITHUB_WORKFLOW_SHA" origin/main
             test "$(git rev-parse "refs/tags/$SDK_RELEASE_TAG^{commit}")" = "$(git rev-parse HEAD)"
             git merge-base --is-ancestor HEAD origin/main
           fi
