@@ -128,6 +128,7 @@ jobs:
       id-token: write
       actions: read
     env:
+      NPM_AUTH_MODE: ${{ secrets.NPM_RELEASE_TOKEN != '' && 'token' || 'oidc' }}
       CLI_RELEASE_TAG: ${{ github.event_name == 'push' && github.ref_name || inputs.release_tag }}
       CLI_PREPARED_RUN_ID: ${{ inputs.prepared_run_id }}
       CLI_ORIGINAL_RUN_ID: ${{ inputs.original_run_id }}
@@ -213,8 +214,18 @@ jobs:
           pnpm --filter @lingva/cli run build
           node scripts/verify-public-boundary.mjs packages/cli/dist
           pnpm --filter @lingva/cli pack --pack-destination release
+      - name: Verify temporary npm credential
+        if: env.NPM_AUTH_MODE == 'token'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_RELEASE_TOKEN }}
+        run: |
+          test -n "$NODE_AUTH_TOKEN"
+          pnpm whoami --registry https://registry.npmjs.org > /dev/null
       - name: Publish the checksummed public binary channel
-        # Public source supports provenance with the approved OIDC trusted publisher.
+        # The temporary Production secret supplies a fallback for registry OIDC outages.
+        # Removing it restores OIDC; provenance and all five native gates stay required.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_RELEASE_TOKEN }}
         run: pnpm --filter @lingva/cli publish --access public --provenance --no-git-checks
       - name: Verify anonymous public assets
         run: |
