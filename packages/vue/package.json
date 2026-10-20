@@ -1,6 +1,6 @@
 {
   "name": "@lingva/vue",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Vue adapter for Lingva localization",
   "license": "SEE LICENSE IN LICENSE.md",
   "sideEffects": false,

@@ -6,7 +6,7 @@ standalone `lingva` executable used by direct downloads, Homebrew, npm, and
 PyPI. Language packages may locate and launch this binary, but must not
 reimplement CLI behavior.
 
-Engine version **0.1.4** provides the complete command surface below. Verify
+Engine version **0.1.6** provides the complete command surface below. Verify
 `lingva --version` when upgrading an older installation.
 
 ## Customer command surface

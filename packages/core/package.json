@@ -1,6 +1,6 @@
 {
   "name": "@lingva/core",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Core client for Lingva localization platform",
   "license": "SEE LICENSE IN LICENSE.md",
   "publishConfig": {

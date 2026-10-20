@@ -24,7 +24,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-ENGINE_VERSION = "0.1.5"
+ENGINE_VERSION = "0.1.6"
 WINDOWS_SYSTEM_NAME = "Windows"
 DEFAULT_ASSET_BASE_URL = "https://unpkg.com/@lingva/cli"
 MAX_ASSET_BYTES = 200 * 1024 * 1024
