@@ -48,7 +48,10 @@ jobs:
         run: |
           if [ "$RETRY" = true ]; then
             [[ "$SDK_RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
-            test "$WORKFLOW_REF" = "refs/tags/sdk-recovery/$SDK_RELEASE_TAG"
+            case "$WORKFLOW_REF" in
+              "refs/tags/sdk-recovery/$SDK_RELEASE_TAG"|"refs/tags/sdk-recovery-$SDK_RELEASE_TAG") ;;
+              *) exit 1 ;;
+            esac
             git merge-base --is-ancestor "$GITHUB_WORKFLOW_SHA" origin/main
             test "$(git rev-parse "refs/tags/$SDK_RELEASE_TAG^{commit}")" = "$(git rev-parse HEAD)"
             git merge-base --is-ancestor HEAD origin/main
@@ -138,6 +141,8 @@ jobs:
     needs: verify
     runs-on: ubuntu-latest
     environment: Production
+    env:
+      NPM_AUTH_MODE: ${{ secrets.NPM_RELEASE_TOKEN != '' && 'token' || 'oidc' }}
     permissions:
       contents: write
       id-token: write
@@ -163,7 +168,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify temporary npm credential
+        if: env.NPM_AUTH_MODE == 'token'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_RELEASE_TOKEN }}
+        run: |
+          test -n "$NODE_AUTH_TOKEN"
+          pnpm whoami --registry https://registry.npmjs.org > /dev/null
+
       - name: Check npm OIDC authentication without exposing credentials
+        if: env.NPM_AUTH_MODE == 'oidc'
         env:
           FORCE_COLOR: 0
         run: |
@@ -193,8 +207,27 @@ jobs:
           console.log('npm accepted this workflow identity for @lingva/core.');
           JS
 
-      - name: Publish with npm trusted publishing
+      - name: Publish with provenance and selected authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_RELEASE_TOKEN }}
         uses: changesets/action/publish@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: pnpm release
+
+      - name: Verify anonymous registry availability and provenance
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const groups = JSON.parse(fs.readFileSync('.changeset/config.json')).fixed;
+          for (const name of groups.flat()) {
+            const version = JSON.parse(fs.readFileSync(`packages/${name.slice(8)}/package.json`)).version;
+            const response = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name)}/${version}`);
+            if (!response.ok) throw new Error(`${name}@${version} is not public (HTTP ${response.status}); check npm staged approvals before retrying.`);
+            const metadata = await response.json();
+            if (metadata.name !== name || metadata.version !== version || !metadata.dist?.attestations?.url) {
+              throw new Error(`Missing public identity or provenance for ${name}@${version}`);
+            }
+            console.log(`Verified public ${name}@${version} with provenance.`);
+          }
+          JS
