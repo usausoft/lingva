@@ -396,6 +396,14 @@ describe('hosted project contract', () => {
   });
 
   describe('createLingvaHostedProjectUpdatePayload', () => {
+    it('normalizes optional names and rejects blank or oversized names', () => {
+      const project = { projectId: 'demo', defaultLocale: 'en', locales: ['en'] };
+      expect(createLingvaHostedProjectUpdatePayload({ ...project, name: '  Mobile app  ' }).name).toBe('Mobile app');
+      expect(createLingvaHostedProjectUpdatePayload(project)).not.toHaveProperty('name');
+      expect(() => createLingvaHostedProjectUpdatePayload({ ...project, name: ' ' })).toThrow();
+      expect(() => createLingvaHostedProjectUpdatePayload({ ...project, name: 'x'.repeat(121) })).toThrow();
+    });
+
     it('normalizes a valid locale list and pins the default first', () => {
       expect(
         createLingvaHostedProjectUpdatePayload({

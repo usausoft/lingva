@@ -283,6 +283,8 @@ export interface LingvaHostedProjectDeleteInput {
 }
 
 export interface LingvaHostedProjectUpdateInput {
+  /** Omit to preserve the current display name. Project ID never changes. */
+  name?: string;
   defaultLocale: string;
   locales: readonly string[];
   projectId: string;
@@ -999,6 +1001,10 @@ export function normalizeLingvaHostedProjectUpdateInput(
 ): LingvaHostedProjectUpdateInput {
   const projectId = normalizeIdentifier(input.projectId, 'projectId', LINGVA_HOSTED_PROJECT_ID_PATTERN);
   const defaultLocale = normalizeLocaleCode(input.defaultLocale, 'defaultLocale');
+  const name = input.name === undefined ? undefined : normalizeRequiredString(input.name, 'name');
+  if (name !== undefined && name.length > LINGVA_HOSTED_PROJECT_NAME_MAX_LENGTH) {
+    throw new Error('Lingva hosted project name is too long.');
+  }
 
   if (!Array.isArray(input.locales) || input.locales.length === 0) {
     throw new Error('Lingva hosted project locales must include at least one entry.');
@@ -1020,6 +1026,7 @@ export function normalizeLingvaHostedProjectUpdateInput(
   }
 
   return {
+    ...(name === undefined ? {} : { name }),
     projectId,
     defaultLocale,
     locales: [defaultLocale, ...locales.filter((locale) => locale !== defaultLocale)],
