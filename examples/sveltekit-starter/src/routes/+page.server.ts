@@ -3,7 +3,7 @@ import { createLingvaSvelteServer } from '@lingva/svelte';
 import { redirect } from '@sveltejs/kit';
 import lingvaConfig from '../../lingva.config';
 import lingvaProject, { type resources } from '../../.lingva/generated/project';
-import { LOCALE_COOKIE, resolveStarterLocale } from '$lib/locale';
+import { LOCALE_COOKIE, resolveStarterLocale } from '#lib/locale.ts';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies }) => {

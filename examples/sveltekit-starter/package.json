@@ -14,17 +14,20 @@
   "dependencies": {
     "@lingva/core": "workspace:*",
     "@lingva/svelte": "workspace:*",
-    "@sveltejs/kit": "2.70.3",
-    "svelte": "^5.57.0"
+    "@sveltejs/kit": "3.0.0",
+    "svelte": "^5.57.1"
   },
   "devDependencies": {
     "@lingva/cli": "workspace:*",
     "@lingva/eslint-config": "workspace:*",
-    "@sveltejs/adapter-auto": "7.0.1",
+    "@sveltejs/adapter-auto": "8.0.0",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
     "eslint": "^9.39.2",
     "svelte-check": "^4.3.4",
-    "typescript": "^5.9.3",
+    "typescript": "6.0.3",
     "vite": "^8.0.16"
+  },
+  "imports": {
+    "#lib/*": "./src/lib/*"
   }
 }

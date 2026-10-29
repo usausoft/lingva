@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 127.0.0.1 --port 3600",
-    "build": "nuxt build",
+    "build": "nuxt typecheck && nuxt build",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "nuxt prepare && nuxt typecheck",
     "lingva:check": "lingva check",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@lingva/core": "workspace:*",
     "@lingva/vue": "workspace:*",
-    "nuxt": "4.5.2",
+    "nuxt": "4.6.2",
     "vue": "^3.5.39"
   },
   "devDependencies": {

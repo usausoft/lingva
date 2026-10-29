@@ -229,6 +229,27 @@ export type {
   LingvaAuthRateLimitResponse,
 } from './auth-rate-limit';
 export {
+  LINGVA_GUARDED_APPROVAL_ACTIONS,
+  LINGVA_GUARDED_APPROVAL_REQUEST_MAX_BYTES,
+  LINGVA_GUARDED_APPROVAL_RESPONSE_MAX_BYTES,
+  createLingvaGuardedApprovalContextPayload,
+  createLingvaGuardedApprovalPayload,
+  parseLingvaGuardedApprovalContextResponse,
+  parseLingvaGuardedApprovalResponse,
+} from './guarded-approval';
+export type {
+  LingvaGuardedApprovalLocator,
+  LingvaGuardedApprovalScope,
+  LingvaGuardedApprovalCommand,
+  LingvaGuardedApprovalContextPayload,
+  LingvaGuardedApprovalPayload,
+  LingvaGuardedApprovalOutcome,
+  LingvaGuardedApprovalContext,
+  LingvaGuardedApprovalContextResponse,
+  LingvaGuardedApprovalResult,
+  LingvaGuardedApprovalResponse,
+} from './guarded-approval';
+export {
   LINGVA_DEFAULT_AUTHORING_ENVIRONMENT,
   LINGVA_MAX_AUTHORING_VALUE_LENGTH,
   LINGVA_REMOTE_AUTHORING_ACTIONS,

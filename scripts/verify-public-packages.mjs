@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -100,6 +101,11 @@ async function main() {
       await run(PACKAGE_MANAGER_COMMAND, ['--dir', directory, 'pack', '--pack-destination', tarballDirectory]);
     }
 
+    for (const manifest of manifests) {
+      const bytes = await fs.readFile(path.join(tarballDirectory, tarballName(manifest)));
+      console.log(`Candidate ${manifest.name} SHA256 ${createHash('sha256').update(bytes).digest('hex')}`);
+    }
+
     const packageDependencies = Object.fromEntries(
       manifests.map((manifest) => [manifest.name, `file:${path.join(tarballDirectory, tarballName(manifest))}`])
     );
@@ -139,23 +145,34 @@ async function main() {
       `packages: []\noverrides:\n${packageOverrides}\n`,
       'utf8'
     );
+    await fs.copyFile(
+      path.join(root, 'packages/core/test/guarded-approval-consumer.cjs'),
+      path.join(consumerDirectory, 'guarded-approval-smoke.cjs')
+    );
+    const guardedTypes = await fs.readFile(
+      path.join(root, 'packages/core/test/guarded-approval-consumer.types.ts'),
+      'utf8'
+    );
+    const coreIndex = PUBLIC_PACKAGE_NAMES.indexOf('@lingva/core');
     await fs.writeFile(
       path.join(consumerDirectory, 'smoke.mjs'),
       `${PUBLIC_PACKAGE_NAMES.map((name, index) => `import * as package${index} from '${name}';`).join('\n')}\n\n` +
         `const packages = [${PUBLIC_PACKAGE_NAMES.map((_, index) => `package${index}`).join(', ')}];\n` +
+        `import verifyGuardedApproval from './guarded-approval-smoke.cjs';\nverifyGuardedApproval(packages[${coreIndex}]);\n` +
         `if (packages.some((entry) => Object.keys(entry).length === 0)) throw new Error('A Lingva package exported no symbols.');\n`,
       'utf8'
     );
     await fs.writeFile(
       path.join(consumerDirectory, 'smoke.cjs'),
       `'use strict';\nconst packages = ${JSON.stringify(PUBLIC_PACKAGE_NAMES)}.map((name) => require(name));\n` +
+        `require('./guarded-approval-smoke.cjs')(packages[${coreIndex}]);\n` +
         `if (packages.some((entry) => Object.keys(entry).length === 0)) throw new Error('A Lingva package exported no symbols.');\n`,
       'utf8'
     );
     await fs.writeFile(
       path.join(consumerDirectory, 'types.ts'),
       `${PUBLIC_PACKAGE_NAMES.map((name, index) => `import * as package${index} from '${name}';`).join('\n')}\n` +
-        `export const packageExportCounts = [${PUBLIC_PACKAGE_NAMES.map((_, index) => `package${index}`).join(', ')}].map((entry) => Object.keys(entry).length);\n`,
+        `export const packageExportCounts = [${PUBLIC_PACKAGE_NAMES.map((_, index) => `package${index}`).join(', ')}].map((entry) => Object.keys(entry).length);\n${guardedTypes}`,
       'utf8'
     );
     await fs.writeFile(
