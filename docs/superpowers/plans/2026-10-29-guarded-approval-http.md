@@ -28,11 +28,13 @@
 ### Task 1: Portable bounded HTTP client
 
 **Files:**
+
 - Create: `packages/core/src/guarded-approval-http.ts`
 - Create: `packages/core/src/guarded-approval-http.test.ts`
 - Modify: `packages/core/src/index.ts`
 
 **Interfaces:**
+
 - Consumes existing guarded scope/command/builders/parsers and response types.
 - Produces `createLingvaGuardedApprovalHttpClient(options: LingvaGuardedApprovalHttpOptions): LingvaGuardedApprovalHttpClient`, methods `getContext(scope,options?): Promise<LingvaGuardedApprovalContextResponse>` and `approve(command,options?): Promise<LingvaGuardedApprovalResponse>`.
 - Exports error class and named error-kind constants, timeout/token constants, options/client/call-options/kind/phase/recovery types. Error fields are readonly `kind`, `status?`, `phase`, `recovery`.
@@ -40,46 +42,50 @@
 - [x] Write tests importing the public index namespace; assert factory/error exports exist, literal POST wire, headers/options, recognized context projection and matching acknowledgment. Test deferred credential/config/caller mutation, input/endpoint/token limits, zero network calls on invalid input and safe errors for every status/classification.
 - [x] Add byte-stream tests: exact128KiB success/one byte over, split multibyte UTF-8, invalid UTF-8/JSON/missing body, wrong full locator/UUID, ignored Content-Length, cancellation and released locks. Add stalled callback/Fetch/body, pre/mid abort, late responses/rejections, empty-chunk deadline, timer/listener cleanup and at most one network call.
 - [x] Run `pnpm --filter @lingva/core test -- src/guarded-approval-http.test.ts`.
-  Expected: assertion failure because factory export is missing, not a missing-module error.
+      Expected: assertion failure because factory export is missing, not a missing-module error.
 - [x] Implement the interface in the new module. Capture config at factory creation and payload/body before the first await. Use a single application deadline and internal-only failure classification; never trust dependency error text. Check elapsed monotonic time between stream chunks as well as timer abort. Cancel/discard late responses without awaiting unbounded cleanup.
 - [x] Run `pnpm --filter @lingva/core test` and core lint/typecheck.
-  Expected: existing250 plus all new tests pass; static gates pass.
+      Expected: existing250 plus all new tests pass; static gates pass.
 - [x] Commit client, exports, tests, self-contained spec and this plan.
 - [x] Completion command: `pnpm --filter @lingva/core test`.
 
 ### Task 2: Real Fetch and packaged-consumer contracts
 
 **Files:**
+
 - Create: `packages/core/src/guarded-approval-http.loopback.test.ts`
 - Create: `packages/core/test/guarded-approval-http-consumer.cjs`
 - Modify: `packages/core/test/guarded-approval-consumer.types.ts`
 - Modify: `scripts/verify-public-packages.mjs`
 
 **Interfaces:**
+
 - Consumes Task1 factory/error/types and unchanged codec scope/command types.
 - Produces owned-loopback contract tests and async ESM/CJS/TypeScript package smoke, without an actual server implementation.
 
 - [x] Write owned-loopback tests for default Fetch POST/header/body, redirect target hit count0, no cookie/credential fallback, stalled body deadline and simulated receipt/lost-ack followed by401/403/409 and explicit identical-command success. Assert one simulated commit, body/UUID equality and no automatic requests. Write packed consumer smoke asserting new exports, both operations and static error fields; add compile-time invalid options/identity override assertions.
 - [x] Run core loopback tests; run new smoke against baseline main built core.
-  Expected: loopback tests pass on Task1 behavior; baseline packed smoke fails with missing-export assertion, proving consumer wiring before modification.
+      Expected: loopback tests pass on Task1 behavior; baseline packed smoke fails with missing-export assertion, proving consumer wiring before modification.
 - [x] Wire async HTTP smoke into both packed ESM and CJS entrypoints; preserve existing codec smoke and all11 package checks.
 - [x] Run `pnpm --filter @lingva/core test`, `pnpm build:packages`, `pnpm verify:packages`.
-  Expected: all core cases and11 packed consumers including ESM/CJS/TypeScript pass; no registry publication occurs.
+      Expected: all core cases and11 packed consumers including ESM/CJS/TypeScript pass; no registry publication occurs.
 - [x] Commit owned-loopback and consumer contracts.
 - [x] Completion command: `pnpm --filter @lingva/core test`.
 
 ### Task 3: Whole-workspace verification and delivery record
 
 **Files:**
+
 - Create: `docs/verification/guarded-approval-http.md`
 - Modify: plan checkboxes after observed completion.
 
 **Interfaces:**
+
 - Consumes Task1 client and Task2 test/package contracts.
 - Produces dated local verification record with exact counts, limitations and one public candidate PR.
 
 - [x] Run `pnpm test`, `pnpm lint`, `pnpm typecheck`, `pnpm test:dependency-security`, `pnpm audit:prod` and inspect results. Run build/packages again only if changes invalidate prior artifacts.
-  Expected: workspace gates pass; audit records existing documented patched-artifact exceptions accurately.
+      Expected: workspace gates pass; audit records existing documented patched-artifact exceptions accurately.
 - [x] Verify unchanged legacy codec/authoring/delivery sources, manifests/licenses/dependency pins and original SDK checkout. Record command results and loopback simulation limits.
 - [x] Commit verification record. Completion command: `pnpm --filter @lingva/core test`.
 - [x] Dispatch one fresh whole-branch review after all task gates. Regrade findings by user effect; fix Important/Critical once with genuine regression RED/GREEN and green suite. Ledger minors and every ruling.
