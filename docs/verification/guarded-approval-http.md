@@ -4,7 +4,7 @@
 
 ## Observed gates
 
-- Core:323 tests in11 files, including65 injected-Fetch cases and8 owned-loopback cases. The250 existing core cases remain green. The missing public factory produced genuine assertion RED before implementation; the old built package produced a missing-export assertion RED before adding packed HTTP consumer coverage.
+- Core: 330 tests in 12 files, including 65 injected-Fetch cases, 8 owned-loopback cases and 7 lifecycle regression cases. The250 existing core cases remain green. The missing public factory produced genuine assertion RED before implementation; the old built package produced a missing-export assertion RED before adding packed HTTP consumer coverage.
 - `pnpm test`:31 workspace tasks passed. `pnpm lint`:28 tasks plus repository lint passed. `pnpm typecheck`:29 tasks passed.
 - `pnpm build:packages`:11 protected public package builds passed. `pnpm verify:packages`:all11 packed consumers passed, including the new guarded HTTP ESM/CJS behavior and TypeScript positive/negative contracts. No registry publication command ran.
 - `pnpm test:dependency-security`:23 passed. `pnpm audit:prod` exited0 with the existing two reviewed patched-artifact exceptions (one low, one high). This is not an exception-free audit; see [dependency repair evidence](../specs/workspace-dependency-security.md).
@@ -20,4 +20,8 @@ The receipt fixture is a transport contract simulation, not evidence of any serv
 
 ## Delivery boundary
 
-This remains an unpublished opt-in candidate. Package versions, licenses and existing API behavior are unchanged. Server implementation, existing caller adoption, automatic recovery persistence, provider operations and deployment are excluded. One fresh whole-branch review follows these local gates; review conclusions and any regression corrections are recorded before delivery.
+This remains an unpublished opt-in candidate. Package versions, licenses and existing API behavior are unchanged. Server implementation, existing caller adoption, automatic recovery persistence, provider operations and deployment are excluded. One fresh whole-branch review identified four Important lifecycle issues and one interoperability issue, promoted to Important because valid cross-realm byte chunks must work. All five were corrected in one pass with seven assertions observed failing against the original implementation, then passing with the complete 330-case suite. No findings remain deferred.
+
+The corrections replace shared interruption-promise reactions with removable subscriptions, attach rejection handlers before cancellation checks, capture response ownership at fulfillment, make cleanup nonthrowing, and accept cross-realm Uint8Array chunks. A forced-GC subprocess retained all 10,000 empty chunks before the correction; after correction its assertion permits at most two while the next read remains stalled. Other regressions cover synchronous abort during credential/Fetch entry, cancellation immediately after response fulfillment, throwing body/listener cleanup and foreign-realm bytes. Subprocesses load current source with the declared Vite transformer in middleware mode without listening; they do not rebuild shared dist during workspace compilation. Protected package builds and packed consumers run separately.
+
+The final workspace, static, protected-build, packed-consumer, dependency-security and audit gates above were rerun after corrections. Server identity/admission, receipt retention and database atomicity remain outside this client and unproven by these tests. Existing caller adoption and cross-session persistence remain caller-owned; this additive client does not supply them.

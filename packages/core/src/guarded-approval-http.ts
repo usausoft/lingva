@@ -113,6 +113,14 @@ function discard(body: ReadableStream<Uint8Array> | null): void {
     /* Untrusted cleanup cannot escape or block. */
   }
 }
+function discardResponse(response: Response | undefined): void {
+  try {
+    const body = response?.body;
+    if (body && !body.locked) discard(body);
+  } catch {
+    /* Property access is untrusted cleanup too. */
+  }
+}
 function statusKind(status: number): LingvaGuardedApprovalHttpErrorKind {
   if (status === 400 || status === 413) return KINDS.invalidRequest;
   if (status === 401) return KINDS.unauthenticated;
@@ -127,20 +135,21 @@ function attempt(timeoutMs: number, caller?: AbortSignal) {
   const deadline = performance.now() + timeoutMs;
   let open = true;
   let interrupted = false;
-  let reject!: (reason: Failure) => void;
-  const interruption = new Promise<never>((_, no) => {
-    reject = no;
-  });
-  // Pre-aborted calls can fail before their first race attaches.
-  void interruption.catch(() => {});
+  // Settled waits must unsubscribe; a shared pending promise would retain every read/chunk.
+  const waiters = new Set<(error: Failure) => void>();
   const abort = () => {
     if (!open || interrupted) return;
     interrupted = true;
     controller.abort();
-    reject(new Failure(KINDS.transport));
+    for (const waiter of waiters) waiter(new Failure(KINDS.transport));
   };
   const timer = setTimeout(abort, timeoutMs);
-  caller?.addEventListener('abort', abort, { once: true });
+  try {
+    caller?.addEventListener('abort', abort, { once: true });
+  } catch {
+    clearTimeout(timer);
+    throw new Failure(KINDS.invalidRequest);
+  }
   function check() {
     if (caller?.aborted || performance.now() >= deadline) abort();
     if (interrupted) throw new Failure(KINDS.transport);
@@ -149,16 +158,61 @@ function attempt(timeoutMs: number, caller?: AbortSignal) {
     signal: controller.signal,
     isOpen: () => open && !interrupted,
     check,
-    async wait<T>(promise: Promise<T>): Promise<T> {
-      check();
-      const result = await Promise.race([promise, interruption]);
-      check();
-      return result;
+    wait<T>(promise: Promise<T>): Promise<T> {
+      return new Promise<T>((resolve, reject) => {
+        let settled = false;
+        const fail = (error: unknown) => {
+          if (settled) return;
+          settled = true;
+          waiters.delete(fail);
+          reject(error instanceof Error ? error : new Error('Guarded approval dependency failed.'));
+        };
+        // Install both handlers before check can throw: dependency entry may already have aborted.
+        void promise.then(
+          (value) => {
+            if (settled) return;
+            try {
+              check();
+            } catch (error) {
+              fail(error);
+              return;
+            }
+            if (settled) return;
+            settled = true;
+            waiters.delete(fail);
+            resolve(value);
+          },
+          (error: unknown) => {
+            try {
+              check();
+            } catch (interruption) {
+              fail(interruption);
+              return;
+            }
+            fail(error);
+          }
+        );
+        waiters.add(fail);
+        try {
+          check();
+        } catch (error) {
+          fail(error);
+        }
+      });
     },
     close() {
       open = false;
       clearTimeout(timer);
-      caller?.removeEventListener('abort', abort);
+      try {
+        caller?.removeEventListener('abort', abort);
+      } catch {
+        // Native fallback handles AbortSignal subclasses/adapters with broken cleanup methods.
+        try {
+          EventTarget.prototype.removeEventListener.call(caller, 'abort', abort);
+        } catch {
+          /* Best effort only. */
+        }
+      }
     },
   };
 }
@@ -178,7 +232,10 @@ async function readResponse(response: Response, active: Attempt): Promise<unknow
         complete = true;
         break;
       }
-      if (!(chunk.value instanceof Uint8Array) || chunk.value.byteLength > buffer.byteLength - length) {
+      if (
+        !(ArrayBuffer.isView(chunk.value) && Object.prototype.toString.call(chunk.value) === '[object Uint8Array]') ||
+        chunk.value.byteLength > buffer.byteLength - length
+      ) {
         throw new Failure(KINDS.invalidResponse);
       }
       buffer.set(chunk.value, length);
@@ -274,7 +331,8 @@ export function createLingvaGuardedApprovalHttpClient(
           referrerPolicy: 'no-referrer',
         })
       ).then((value) => {
-        if (!current.isOpen()) discard(value.body);
+        response = value;
+        if (!current.isOpen()) discardResponse(value);
         return value;
       });
       token = undefined;
@@ -291,9 +349,13 @@ export function createLingvaGuardedApprovalHttpClient(
         error instanceof Failure ? error : new Failure(phase === 'local' ? KINDS.invalidRequest : KINDS.transport);
       throw new LingvaGuardedApprovalHttpError(safe.kind, phase, recovery, safe.status);
     } finally {
-      active?.close();
+      try {
+        active?.close();
+      } catch {
+        /* Cleanup never replaces the classified result. */
+      }
       // readResponse owns acquired readers; this covers errors before reader acquisition.
-      if (response?.body && !response.body.locked) discard(response.body);
+      discardResponse(response);
     }
   }
   return {

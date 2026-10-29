@@ -82,5 +82,5 @@
   Expected: workspace gates pass; audit records existing documented patched-artifact exceptions accurately.
 - [x] Verify unchanged legacy codec/authoring/delivery sources, manifests/licenses/dependency pins and original SDK checkout. Record command results and loopback simulation limits.
 - [x] Commit verification record. Completion command: `pnpm --filter @lingva/core test`.
-- [ ] Dispatch one fresh whole-branch review after all task gates. Regrade findings by user effect; fix Important/Critical once with genuine regression RED/GREEN and green suite. Ledger minors and every ruling.
+- [x] Dispatch one fresh whole-branch review after all task gates. Regrade findings by user effect; fix Important/Critical once with genuine regression RED/GREEN and green suite. Ledger minors and every ruling.
 - [ ] Refresh private roadmap/project evidence, publish one public SDK PR, attach it and verify its exact head. No successor roadmap PR or SDK merge in this batch.
