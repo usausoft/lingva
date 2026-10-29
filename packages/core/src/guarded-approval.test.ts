@@ -216,6 +216,57 @@ describe('guarded approval request codecs', () => {
   });
 });
 
+describe('guarded variant descriptors', () => {
+  it.each(['accessor', 'hidden value', 'hidden accessor'])(
+    'rejects a present %s variant instead of changing the selected target',
+    (kind) => {
+      let calls = 0;
+      const locator = { ...scope.locator };
+      Object.defineProperty(locator, 'variantId', {
+        enumerable: kind === 'accessor',
+        ...(kind === 'hidden value'
+          ? { value: 'calm' }
+          : {
+              get() {
+                calls++;
+                return 'calm';
+              },
+            }),
+      });
+      const expected = { ...scope, locator };
+      expect(() => contextPayload(expected)).toThrowError(new TypeError(invalidMessage));
+      expect(() => approvalPayload({ ...command(), locator })).toThrowError(new TypeError(invalidMessage));
+      expect(calls).toBe(0);
+    }
+  );
+  it.each(['accessor', 'hidden value', 'hidden accessor'])(
+    'rejects a base-variant response when the expected variant is a present %s',
+    (kind) => {
+      let calls = 0;
+      const locator = { ...scope.locator };
+      Object.defineProperty(locator, 'variantId', {
+        enumerable: kind === 'accessor',
+        ...(kind === 'hidden value'
+          ? { value: 'calm' }
+          : {
+              get() {
+                calls++;
+                return 'calm';
+              },
+            }),
+      });
+      expect(parseContext(context(), { ...scope, locator })).toBeNull();
+      expect(calls).toBe(0);
+    }
+  );
+  it('retains ordinary missing or undefined optional variants as the base variant', () => {
+    const expected = { ...scope, locator: { ...scope.locator, variantId: undefined } };
+    expect(contextPayload(expected)).toEqual({ action: 'review-context', ...scope });
+    expect(approvalPayload({ ...command(), locator: expected.locator }).locator).toEqual(scope.locator);
+    expect(parseContext(context(), expected)).toEqual(context());
+  });
+});
+
 describe('guarded context observations', () => {
   // Missing validation, input aliasing or ignored scope differences breaks these cases.
   it('returns a fresh recognized success envelope without authenticating it', () => {

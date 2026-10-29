@@ -190,6 +190,8 @@ function scope(value: unknown, strict: boolean, strictLocator = strict): LingvaG
     (strictLocator && !only(locator, LOCATOR_FIELDS))
   )
     return null;
+  const variantDescriptor = Object.getOwnPropertyDescriptor(locator, 'variantId');
+  if (variantDescriptor && (!variantDescriptor.enumerable || !Object.hasOwn(variantDescriptor, 'value'))) return null;
   const entityKey = data(locator, 'entityKey'),
     draftId = data(locator, 'draftId');
   const key = data(locator, 'key'),
