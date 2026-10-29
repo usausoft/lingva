@@ -1431,3 +1431,19 @@ export function shouldFailLingvaValidation<Resources extends LingvaResources>(
 
   return result.errorCount > 0 || result.warningCount > 0 || result.infoCount > 0;
 }
+
+export {
+  LINGVA_GUARDED_APPROVAL_HTTP_TIMEOUT_MS,
+  LINGVA_GUARDED_APPROVAL_HTTP_TOKEN_MAX_BYTES,
+  LINGVA_GUARDED_APPROVAL_HTTP_ERROR_KINDS,
+  LingvaGuardedApprovalHttpError,
+  createLingvaGuardedApprovalHttpClient,
+} from './guarded-approval-http';
+export type {
+  LingvaGuardedApprovalHttpOptions,
+  LingvaGuardedApprovalHttpClient,
+  LingvaGuardedApprovalHttpCallOptions,
+  LingvaGuardedApprovalHttpErrorKind,
+  LingvaGuardedApprovalHttpPhase,
+  LingvaGuardedApprovalHttpRecovery,
+} from './guarded-approval-http';
