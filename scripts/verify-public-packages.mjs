@@ -149,6 +149,10 @@ async function main() {
       path.join(root, 'packages/core/test/guarded-approval-consumer.cjs'),
       path.join(consumerDirectory, 'guarded-approval-smoke.cjs')
     );
+    await fs.copyFile(
+      path.join(root, 'packages/core/test/guarded-approval-http-consumer.cjs'),
+      path.join(consumerDirectory, 'guarded-approval-http-smoke.cjs')
+    );
     const guardedTypes = await fs.readFile(
       path.join(root, 'packages/core/test/guarded-approval-consumer.types.ts'),
       'utf8'
@@ -159,6 +163,7 @@ async function main() {
       `${PUBLIC_PACKAGE_NAMES.map((name, index) => `import * as package${index} from '${name}';`).join('\n')}\n\n` +
         `const packages = [${PUBLIC_PACKAGE_NAMES.map((_, index) => `package${index}`).join(', ')}];\n` +
         `import verifyGuardedApproval from './guarded-approval-smoke.cjs';\nverifyGuardedApproval(packages[${coreIndex}]);\n` +
+        `import verifyGuardedApprovalHttp from './guarded-approval-http-smoke.cjs';\nawait verifyGuardedApprovalHttp(packages[${coreIndex}]);\n` +
         `if (packages.some((entry) => Object.keys(entry).length === 0)) throw new Error('A Lingva package exported no symbols.');\n`,
       'utf8'
     );
@@ -166,6 +171,7 @@ async function main() {
       path.join(consumerDirectory, 'smoke.cjs'),
       `'use strict';\nconst packages = ${JSON.stringify(PUBLIC_PACKAGE_NAMES)}.map((name) => require(name));\n` +
         `require('./guarded-approval-smoke.cjs')(packages[${coreIndex}]);\n` +
+        `require('./guarded-approval-http-smoke.cjs')(packages[${coreIndex}]).catch((error) => { console.error(error); process.exitCode = 1; });\n` +
         `if (packages.some((entry) => Object.keys(entry).length === 0)) throw new Error('A Lingva package exported no symbols.');\n`,
       'utf8'
     );
