@@ -25,7 +25,8 @@
     "verify:packages": "node scripts/verify-public-packages.mjs",
     "release": "pnpm build:packages && pnpm verify:packages && changeset publish",
     "dev": "pnpm --filter @lingva/example-next-starter dev",
-    "dev:docs": "pnpm --filter @lingva/docs dev"
+    "dev:docs": "pnpm --filter @lingva/docs dev",
+    "test:dependency-security": "node --test scripts/dependency-security.test.mjs"
   },
   "keywords": [
     "i18n",

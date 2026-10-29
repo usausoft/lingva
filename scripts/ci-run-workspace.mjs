@@ -19,6 +19,7 @@ function run(args) {
 if (files.length) run(['exec', 'prettier', '--check', '--ignore-unknown', '--', ...files]);
 if (process.env.CI_REPO_CHECKS === 'true') {
   run(['audit:prod']);
+  run(['test:dependency-security']);
   run(['lint:repo']);
   run(['test:cli-release']);
   run(['exec', 'node', '--test', 'scripts/ci-plan.test.mjs']);
