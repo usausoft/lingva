@@ -37,7 +37,7 @@
 - [x] **Step2: Apply narrow repairs.** Update exact owner versions and scoped overrides, migrate only SvelteKit starter configuration using the official guide, and generate the deepmerge patch through `pnpm patch`/`patch-commit`. Preserve dependency installation policy and all Lingva source/version/license inputs. Expected frozen install and exploit/compatibility GREEN.
 - [x] **Step3: Connect and verify the audit boundary.** Add the installed-artifact test command to existing repository checks. Document only the exact deepmerge patched-advisory exception after GREEN. Run frozen install and `pnpm audit:prod`; expected zero unsuppressed findings under the explicitly recorded exception policy.
 - [x] **Step4: Verify compatibility.** Run full workspace lint/types/tests/build, all11 public package builds/tarball consumers, and local HTTP locale smoke for Next/Nuxt/SvelteKit output. Compare codec/license/version hashes with basebf4228b. Expected all relevant gates pass and no source/version/license drift.
-- [ ] **Step5: Record and commit.** Mark actual checks, commit the coherent repair, and run task-done with `pnpm test:dependency-security`. Expected23 installed-artifact/graph tests pass; no merge or release claim.
+- [x] **Step5: Record and commit.** Mark actual checks, commit the coherent repair, and run task-done with `pnpm test:dependency-security`. Expected23 installed-artifact/graph tests pass; no merge or release claim.
 
 ## Final review and handoff
 
