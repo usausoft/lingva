@@ -39,3 +39,47 @@ createLingvaGuardedApprovalContextPayload({ ...guardedScope, actorId: 'not-a-req
 // @ts-expect-error Guarded approval cannot carry a caller-approved identity.
 createLingvaGuardedApprovalPayload({ ...guardedApprovalPayload, approvedBy: 'not-a-request-field' });
 export const guardedOutcome = (response: LingvaGuardedApprovalResponse): 'approved' => response.result.outcome;
+
+import {
+  createLingvaGuardedApprovalHttpClient,
+  LingvaGuardedApprovalHttpError,
+  type LingvaGuardedApprovalHttpOptions,
+  type LingvaGuardedApprovalHttpClient,
+  type LingvaGuardedApprovalHttpCallOptions,
+  type LingvaGuardedApprovalHttpErrorKind,
+  type LingvaGuardedApprovalHttpPhase,
+  type LingvaGuardedApprovalHttpRecovery,
+} from '@lingva/core';
+const guardedHttpOptions: LingvaGuardedApprovalHttpOptions = {
+  endpoint: 'https://example.invalid/review',
+  getBearerToken: (signal: AbortSignal) => {
+    void signal;
+    return 'synthetic.payload.signature';
+  },
+};
+export const guardedHttpClient: LingvaGuardedApprovalHttpClient =
+  createLingvaGuardedApprovalHttpClient(guardedHttpOptions);
+const guardedCall: LingvaGuardedApprovalHttpCallOptions = { signal: new AbortController().signal };
+export const guardedHttpContext: Promise<LingvaGuardedApprovalContextResponse> = guardedHttpClient.getContext(
+  guardedScope,
+  guardedCall
+);
+export const guardedHttpApproval: Promise<LingvaGuardedApprovalResponse> = guardedHttpClient.approve(
+  { ...guardedScope, contextToken: 'a'.repeat(64), operationId: '11111111-1111-4111-8111-111111111111' },
+  guardedCall
+);
+export function guardedHttpErrorFields(error: LingvaGuardedApprovalHttpError) {
+  const kind: LingvaGuardedApprovalHttpErrorKind = error.kind;
+  const phase: LingvaGuardedApprovalHttpPhase = error.phase;
+  const recovery: LingvaGuardedApprovalHttpRecovery = error.recovery;
+  return { kind, phase, recovery };
+}
+// @ts-expect-error Arbitrary request headers are not a supported escape hatch.
+createLingvaGuardedApprovalHttpClient({ ...guardedHttpOptions, headers: { 'X-Actor': 'caller' } });
+guardedHttpClient.approve({
+  ...guardedScope,
+  contextToken: 'a'.repeat(64),
+  operationId: '11111111-1111-4111-8111-111111111111',
+  // @ts-expect-error Actor attribution is never a command field.
+  actorId: 'caller',
+});
