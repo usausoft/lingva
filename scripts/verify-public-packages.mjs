@@ -157,6 +157,10 @@ async function main() {
       path.join(root, 'packages/core/test/guarded-approval-consumer.types.ts'),
       'utf8'
     );
+    const publicationAuditTypes = await fs.readFile(
+      path.join(root, 'packages/core/test/publication-audit-consumer.types.ts'),
+      'utf8'
+    );
     const coreIndex = PUBLIC_PACKAGE_NAMES.indexOf('@lingva/core');
     await fs.writeFile(
       path.join(consumerDirectory, 'smoke.mjs'),
@@ -178,7 +182,7 @@ async function main() {
     await fs.writeFile(
       path.join(consumerDirectory, 'types.ts'),
       `${PUBLIC_PACKAGE_NAMES.map((name, index) => `import * as package${index} from '${name}';`).join('\n')}\n` +
-        `export const packageExportCounts = [${PUBLIC_PACKAGE_NAMES.map((_, index) => `package${index}`).join(', ')}].map((entry) => Object.keys(entry).length);\n${guardedTypes}`,
+        `export const packageExportCounts = [${PUBLIC_PACKAGE_NAMES.map((_, index) => `package${index}`).join(', ')}].map((entry) => Object.keys(entry).length);\n${guardedTypes}\n${publicationAuditTypes}`,
       'utf8'
     );
     await fs.writeFile(

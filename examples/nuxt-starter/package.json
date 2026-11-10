@@ -14,7 +14,7 @@
   "dependencies": {
     "@lingva/core": "workspace:*",
     "@lingva/vue": "workspace:*",
-    "nuxt": "4.6.2",
+    "nuxt": "4.6.3",
     "vue": "^3.5.39"
   },
   "devDependencies": {

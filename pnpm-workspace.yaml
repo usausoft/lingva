@@ -28,6 +28,9 @@ overrides:
   '@hono/node-server': 1.19.13
   '@babel/plugin-transform-modules-systemjs': 7.29.4
   fast-uri: 3.1.9
+  'glob@>=9.0.0 <=14.0.1': 14.0.2
+  'minimatch@>=7.0.0 <11.0.1': 11.0.1
+  'node-forge@<=1.4.0': 1.4.1
   fast-xml-parser: 5.7.0
   follow-redirects: 1.16.0
   lodash-es: 4.18.0
@@ -75,14 +78,8 @@ overrides:
 # key guard patches source and both shipped artifacts. Its installed CJS/UMD
 # exploit and compatibility suite runs in every repository CI check. Remove
 # the patch and exact advisory exception once a fixed release is available.
-# node-forge 1.4.0 has no fixed npm release for CVE-2026-85393 yet. Apply the
-# exact upstream fix from digitalbazaar/forge#1152. The narrowly scoped audit
-# exception below exists because the registry only sees the upstream version,
-# not this patched artifact. Remove both when node-forge 1.4.1 or newer is
-# available through listhen.
 patchedDependencies:
   deepmerge@4.3.1: patches/deepmerge@4.3.1.patch
-  node-forge@1.4.0: patches/node-forge@1.4.0.patch
 
 auditConfig:
   ignoreGhsas:
@@ -91,7 +88,6 @@ auditConfig:
     # example, where patterns come from this repository rather than users.
     # Remove this exception as soon as braces publishes a fixed version.
     - GHSA-vfj7-8cjw-p6xm
-    - GHSA-86w9-cpqp-85rv
     # Registry audit cannot see the tested deepmerge patched artifact above.
     # This exception covers only that advisory, never other deepmerge findings.
     - GHSA-gcqx-w48m-w2h4
